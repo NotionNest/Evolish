@@ -31,3 +31,15 @@
 - **Decision:** Use Tauri 2 as the desktop shell, Rust as the system/application core, and React + TypeScript + Vite for all desktop UI surfaces.
 - **Boundary:** Rust owns business state, platform access, service calls, storage, and secrets. WebViews render UI and communicate through constrained typed IPC.
 - **Rationale:** This structure supports deep native integration and low-overhead resident operation while preserving a flexible UI foundation for the later learning system.
+
+## 2026-08-11 — Foundation decisions accepted
+
+- **Storage:** SQLite is the durable store and is accessed exclusively by Rust application/storage code. WebViews never receive direct SQL access.
+- **Platform sequence:** Deliver and fully validate macOS first, then Windows, then Linux. X11 targets full Phase 1 parity; Wayland publishes a capability matrix and never claims unsupported positioning or capture behavior.
+- **Provider model:** Phase 1 providers are compiled into the application behind capability-specific Rust ports. Dynamic third-party code loading is outside Phase 1.
+- **Localization:** The first supported UI locales are `zh-CN` and `en-US`. Message keys are compile-time checked and the locale model carries text direction for later RTL support.
+- **Identity:** The application identifier is `io.github.notionnest.evolish`.
+- **Distribution:** The repository and future binaries are public. Production distribution requires platform signing, signed updates, database-compatible rollback, SBOM generation, and dependency-license checks.
+- **License:** Evolish is licensed under Apache-2.0. Easydict and Pot may inform behavior research, but their GPL implementation code is not copied into Evolish.
+- **Feature process:** Before implementing each parity feature, document the observed Pot/Easydict pain point, the Evolish behavior decision, platform scope, and acceptance evidence.
+- **Repository governance:** `main` accepts changes through pull requests with required CI, linear history, resolved conversations, and no force push. During the solo-maintainer phase the approval count remains zero.

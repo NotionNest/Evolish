@@ -245,17 +245,20 @@ ServiceAdapter
 - 发布前完成 macOS 签名与 notarization、Windows code signing、Linux 包格式与更新验证。
 - 自动更新采用签名元数据，客户端拒绝未签名或来源不匹配的更新。
 
-## 12. 当前决策状态
+## 12. 已接受的决策
 
 | 决策 | 提案 | 状态 |
 |---|---|---|
 | 桌面框架 | Tauri 2 | 已确认 |
 | 核心语言 | Rust | 已确认 |
 | UI | React + TypeScript + Vite | 已确认 |
-| 数据库 | SQLite，由 Rust 独占访问 | 待确认 |
-| 平台策略 | macOS / Windows / Linux 原生适配层 | 待确认 |
-| Linux 完整对齐 | X11 完整；Wayland 建立能力矩阵 | 待确认 |
-| 动态插件市场 | 阶段一不建设，仅内部适配器 | 待确认 |
+| 数据库 | SQLite，由 Rust 独占访问 | 已确认 |
+| 平台策略 | macOS → Windows → Linux；三端使用原生适配层 | 已确认 |
+| Linux 完整对齐 | X11 完整；Wayland 建立能力矩阵，不虚假宣称同等能力 | 已确认 |
+| Provider 扩展 | 阶段一使用编译期内置适配器，不支持动态插件 | 已确认 |
+| UI 国际化 | `zh-CN`、`en-US`，类型安全并预留 RTL | 已确认 |
+| 公开分发 | 公共仓库与公开二进制；签名、更新和回滚在发布前验收 | 已确认 |
+| 许可证 | Apache-2.0；不复制 Easydict/Pot 的 GPL 实现代码 | 已确认 |
 
 ## 13. 依据
 
