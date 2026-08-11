@@ -155,7 +155,7 @@
 - [x] Configure monthly npm, Cargo, and GitHub Actions Dependabot updates with grouped non-major updates.
 - [x] Document supported versions, private vulnerability reporting, and response expectations in `SECURITY.md`.
 - [x] Commit: `ci: enforce integration and supply chain gates`.
-- [ ] Enable GitHub dependency graph/Dependabot alerts and verify `gh api repos/NotionNest/Evolish/dependency-graph/sbom` returns the repository SBOM.
+- [x] Enable GitHub dependency graph/Dependabot alerts and verify `gh api repos/NotionNest/Evolish/dependency-graph/sbom` returns the repository SBOM.
 
 ### Task 7: Remove verified initialization redundancy
 
@@ -166,11 +166,11 @@
 - Modify: `src/app/App.tsx`
 - Modify/generated: `src/bridge/generated/AppBootstrapDto.ts`
 
-- [ ] Add or adjust tests so the application renders its Rust-provided product name.
-- [ ] Remove `vite preview`, stale `master` trigger, and the no-op reduced-motion rule.
-- [ ] Scope the global `h1` selector to the startup panel.
-- [ ] Run frontend tests, lint, typecheck, and build.
-- [ ] Commit: `refactor: remove initialization-only redundancy`.
+- [x] Add or adjust tests so the application renders its Rust-provided product name.
+- [x] Remove `vite preview`, stale `master` trigger, and the no-op reduced-motion rule.
+- [x] Scope the global `h1` selector to the startup panel.
+- [x] Run frontend tests, lint, typecheck, and build.
+- [x] Commit: `refactor: remove initialization-only redundancy`.
 
 ### Task 8: Validate the complete foundation
 

@@ -53,9 +53,8 @@ src/
 └── test/         前端测试环境
 
 src-tauri/src/
-├── domain/       不依赖 Tauri 的领域类型与规则
 ├── application/  应用用例与协调逻辑
-└── ipc/          最小化 Tauri command 边界
+└── ipc/          最小化 Tauri command 与生成 DTO 边界
 ```
 
 业务增长时应按总体架构增加 `features`、`providers`、`platform`、`storage`、`security` 与 `windows` 模块，不允许 React 直接访问数据库、系统凭据或外部服务密钥。

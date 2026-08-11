@@ -49,9 +49,9 @@ export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
 
   return (
     <main className="app-shell">
-      <section className="startup-panel" aria-labelledby="app-title">
+      <section className="startup-panel" aria-label={t("startup.eyebrow")}>
         <p className="eyebrow">{t("startup.eyebrow")}</p>
-        <h1 id="app-title">Evolish</h1>
+        {bootstrap.status === "ready" && <h1>{bootstrap.data.name}</h1>}
         <p className="purpose">{t("startup.purpose")}</p>
 
         <div className="runtime-status" aria-live="polite">

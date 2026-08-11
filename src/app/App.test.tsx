@@ -10,7 +10,7 @@ describe("App", () => {
         <App
           loadBootstrap={() =>
             Promise.resolve({
-              name: "Evolish",
+              name: "Lingua Forge",
               version: "0.1.0",
               platform: "macOS",
               architecture: "aarch64",
@@ -21,6 +21,9 @@ describe("App", () => {
     );
 
     expect(screen.getByText("Starting application core…")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Lingua Forge" }),
+    ).toBeInTheDocument();
     expect(await screen.findByText("Connected")).toBeInTheDocument();
     expect(screen.getByText("macOS · aarch64")).toBeInTheDocument();
   });
