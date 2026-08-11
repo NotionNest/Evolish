@@ -128,11 +128,11 @@
 - Modify: `package.json`
 - Modify: `.github/workflows/quality.yml`
 
-- [ ] Write a failing Node test for mismatched package/Cargo/Tauri versions and mismatched Rust/Node policy.
-- [ ] Run the test and verify failure against the current Rust 1.85 / 1.97.1 split.
-- [ ] Set Rust MSRV/toolchain/CI to 1.97.1 and Node policy/types/CI to Node 22.
-- [ ] Add a version consistency check for `package.json`, `Cargo.toml`, and `tauri.conf.json` application versions.
-- [ ] Add the check to `pnpm check`; run tests and build.
+- [x] Write a failing Node test for mismatched package/Cargo/Tauri versions and mismatched Rust/Node policy.
+- [x] Run the test and verify failure against the current Rust 1.85 / 1.97.1 split.
+- [x] Set Rust MSRV/toolchain/CI to 1.97.1 and Node policy/types/CI to Node 22.
+- [x] Add a version consistency check for `package.json`, `Cargo.toml`, and `tauri.conf.json` application versions.
+- [x] Add the check to `pnpm check`; run tests and build.
 - [ ] Commit: `build: align application and toolchain versions`.
 
 ### Task 6: Prove full Tauri integration and supply-chain health in CI

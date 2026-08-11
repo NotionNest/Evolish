@@ -6,7 +6,7 @@
   "type": "module",
   "packageManager": "pnpm@11.17.0",
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "vite",
@@ -17,7 +17,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:commits": "node --test scripts/validate-commit-message.test.mjs",
-    "check": "pnpm lint && pnpm test && pnpm test:commits && pnpm build",
+    "test:versions": "node --test scripts/check-versions.test.mjs",
+    "check": "pnpm lint && pnpm test && pnpm test:commits && pnpm test:versions && pnpm build",
     "setup:git": "node scripts/setup-git.mjs",
     "prepare": "pnpm setup:git",
     "tauri": "tauri"
@@ -32,7 +33,7 @@
     "@tauri-apps/cli": "^2",
     "@testing-library/jest-dom": "^6",
     "@testing-library/react": "^16",
-    "@types/node": "^24",
+    "@types/node": "^22",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",

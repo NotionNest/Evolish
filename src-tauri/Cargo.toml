@@ -3,7 +3,7 @@ name = "evolish"
 version = "0.1.0"
 description = "Evolish desktop application core"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.97.1"
 
 [lib]
 name = "evolish_lib"

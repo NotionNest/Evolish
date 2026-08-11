@@ -18,7 +18,7 @@ Evolish 是一个面向 macOS、Windows 与 Linux 的翻译和学习桌面应用
 
 ## 环境要求
 
-- Node.js 22 或更新版本
+- Node.js 22.x（仓库通过 `.node-version` 固定主版本）
 - pnpm 11
 - Rust 1.97.1（仓库通过 `rust-toolchain.toml` 固定）
 - 对应平台的 Tauri 2 系统依赖
