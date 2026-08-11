@@ -1,0 +1,32 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+      timezone: Asia/Shanghai
+    groups:
+      non-major:
+        update-types: [minor, patch]
+    labels: [dependencies, javascript]
+
+  - package-ecosystem: cargo
+    directory: /src-tauri
+    schedule:
+      interval: monthly
+      timezone: Asia/Shanghai
+    groups:
+      non-major:
+        update-types: [minor, patch]
+    labels: [dependencies, rust]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      timezone: Asia/Shanghai
+    groups:
+      non-major:
+        update-types: [minor, patch]
+    labels: [dependencies, github-actions]

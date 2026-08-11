@@ -4,6 +4,10 @@ import {
   getAppBootstrap,
   type AppBootstrap,
 } from "../bridge/appBootstrap";
+import { normalizeIpcError } from "../bridge/errors";
+import type { AppErrorDto } from "../bridge/generated/AppErrorDto";
+import { isMessageKey } from "../i18n/messages";
+import { useI18n } from "../i18n/useI18n";
 import "./app.css";
 
 type LoadBootstrap = () => Promise<AppBootstrap>;
@@ -15,9 +19,10 @@ type AppProps = {
 type BootstrapState =
   | { status: "loading" }
   | { status: "ready"; data: AppBootstrap }
-  | { status: "error"; message: string };
+  | { status: "error"; error: AppErrorDto };
 
 export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
+  const { t } = useI18n();
   const [bootstrap, setBootstrap] = useState<BootstrapState>({
     status: "loading",
   });
@@ -33,9 +38,7 @@ export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
       })
       .catch((error: unknown) => {
         if (isActive) {
-          const message =
-            error instanceof Error ? error.message : "Unknown startup error";
-          setBootstrap({ status: "error", message });
+          setBootstrap({ status: "error", error: normalizeIpcError(error) });
         }
       });
 
@@ -46,32 +49,34 @@ export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
 
   return (
     <main className="app-shell">
-      <section className="startup-panel" aria-labelledby="app-title">
-        <p className="eyebrow">Desktop workspace</p>
-        <h1 id="app-title">Evolish</h1>
-        <p className="purpose">
-          Translation, context capture, and learning in one focused workspace.
-        </p>
+      <section className="startup-panel" aria-label={t("startup.eyebrow")}>
+        <p className="eyebrow">{t("startup.eyebrow")}</p>
+        {bootstrap.status === "ready" && <h1>{bootstrap.data.name}</h1>}
+        <p className="purpose">{t("startup.purpose")}</p>
 
         <div className="runtime-status" aria-live="polite">
-          {bootstrap.status === "loading" && <p>Starting application core…</p>}
+          {bootstrap.status === "loading" && <p>{t("startup.loading")}</p>}
           {bootstrap.status === "error" && (
             <p className="error-message">
-              Application core unavailable: {bootstrap.message}
+              {t(
+                isMessageKey(bootstrap.error.messageKey)
+                  ? bootstrap.error.messageKey
+                  : "error.unexpected",
+              )}
             </p>
           )}
           {bootstrap.status === "ready" && (
             <dl>
               <div>
-                <dt>Core</dt>
-                <dd>Connected</dd>
+                <dt>{t("runtime.core")}</dt>
+                <dd>{t("runtime.connected")}</dd>
               </div>
               <div>
-                <dt>Version</dt>
+                <dt>{t("runtime.version")}</dt>
                 <dd>{bootstrap.data.version}</dd>
               </div>
               <div>
-                <dt>Platform</dt>
+                <dt>{t("runtime.platform")}</dt>
                 <dd>
                   {bootstrap.data.platform} · {bootstrap.data.architecture}
                 </dd>

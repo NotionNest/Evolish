@@ -1,9 +1,9 @@
 # Evolish 技术总体方案与应用架构
 
-> 状态：Proposed  
-> 日期：2026-08-11  
-> 已确认基础栈：[ADR-0001](./adr/0001-desktop-technology-stack.md)  
-> 产品范围：[阶段一 PRD](../reference/pm/phase-1-prd.md)  
+> 状态：Accepted
+> 日期：2026-08-11
+> 已确认基础栈：[ADR-0001](./adr/0001-desktop-technology-stack.md)
+> 产品范围：[阶段一 PRD](../reference/pm/phase-1-prd.md)
 > 功能范围：[Easydict 功能对齐基线](../reference/pm/easydict-feature-baseline.md)
 
 ## 1. 架构目标
@@ -402,7 +402,7 @@ UI 基础：
 - CSS Variables 作为设计 token；
 - Tailwind 可用于布局与状态样式，但领域组件 API 不暴露 class 字符串协议；
 - React Hook Form 用于 provider 设置；Rust 执行最终校验；
-- `react-i18next` 管理 UI 国际化。
+- 类型安全的内建消息目录与浏览器原生 `Intl` 管理 UI 国际化；首批语言为 `zh-CN`、`en-US`，目录结构预留 RTL 方向信息。
 
 ## 11. 数据架构
 

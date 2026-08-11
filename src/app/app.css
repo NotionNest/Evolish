@@ -23,7 +23,7 @@
   text-transform: uppercase;
 }
 
-h1 {
+.startup-panel h1 {
   margin: 0;
   font-size: clamp(2.5rem, 9vw, 4.5rem);
   font-weight: 650;
@@ -88,13 +88,5 @@ h1 {
     min-height: calc(100vh - (2 * var(--space-4)));
     flex-direction: column;
     justify-content: center;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
   }
 }

@@ -1,8 +1,8 @@
 # Evolish 阶段一产品需求文档
 
-> 状态：需求基线草案  
-> 更新日期：2026-08-11  
-> 参考对象：Easydict `dev` 分支当前公开功能  
+> 状态：Accepted
+> 更新日期：2026-08-11
+> 参考对象：Easydict `dev` 分支当前公开功能
 > 配套清单：[Easydict 功能对齐基线](./easydict-feature-baseline.md)
 
 ## 1. 执行摘要
@@ -227,16 +227,19 @@ Evolish 应提供与 Easydict 对应的动作，并使用各平台习惯的默�
 - 每项平台权限都提供首次说明、系统授权入口和授权状态诊断。
 - 查询会话保留结构化上下文，但默认遵循最小采集原则。
 
-## 10. 当前待确认事项
+## 10. 已关闭的产品决策
 
-1. 阶段一“跨端”是否限定为 macOS、Windows、Linux 桌面端。
-2. 首个完整验收平台及三个平台的交付顺序。
-3. Evolish 是否计划公开分发；这会影响签名、自动更新、许可证和服务凭据策略。
-4. 哪些 Pot/Easydict 使用痛点必须在功能对齐过程中同步修正，而不是先复制其交互。
+| 议题 | 决策 |
+|---|---|
+| 阶段一平台 | macOS、Windows、Linux 桌面端；移动端不在阶段一范围 |
+| 交付顺序 | macOS → Windows → Linux；每个平台完成对应验收后再推进下一平台 |
+| Linux 对齐 | X11 完整对齐；Wayland 按桌面环境和协议建立能力矩阵，不使用不可兑现的统一承诺 |
+| 分发方式 | 公共仓库和公开二进制分发；正式发布前完成签名、可信更新与回滚验证 |
+| 功能对齐方法 | 每项功能编码前先记录 Pot/Easydict 的具体不适点、期望结果和验收证据；对齐能力与结果，不复制其交互缺陷 |
+| 阶段边界 | 阶段一完整交付翻译/词典基础；AI 知识卡与复习系统在阶段二独立设计 |
 
 ## 11. 研究依据
 
 - [Easydict 中文 README](https://github.com/tisfeng/Easydict/blob/dev/README_ZH.md)
 - [Easydict 完整使用指南](https://github.com/tisfeng/Easydict/blob/dev/docs/zh/GUIDE.md)
 - [Easydict GPL-3.0 许可证](https://github.com/tisfeng/Easydict/blob/dev/LICENSE)
-

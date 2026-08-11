@@ -18,7 +18,7 @@ Evolish 是一个面向 macOS、Windows 与 Linux 的翻译和学习桌面应用
 
 ## 环境要求
 
-- Node.js 22 或更新版本
+- Node.js 22.x（仓库通过 `.node-version` 固定主版本）
 - pnpm 11
 - Rust 1.97.1（仓库通过 `rust-toolchain.toml` 固定）
 - 对应平台的 Tauri 2 系统依赖
@@ -41,6 +41,8 @@ cargo test --manifest-path src-tauri/Cargo.toml
 
 分支、提交和 Pull Request 规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。提交消息与 PR 标题使用 Conventional Commits，并由本地 Git hook 和 CI 同时校验。
 
+CI 会在 macOS、Windows、Ubuntu 上构建完整 Tauri 应用，并检查 npm/RustSec advisories、生产依赖许可证、Rust crate 来源和生成式 IPC 绑定漂移。安全问题请按 [Security Policy](SECURITY.md) 使用 GitHub 私密漏洞报告，不要公开提交含利用细节或凭据的 Issue。
+
 ## 代码边界
 
 ```text
@@ -51,9 +53,8 @@ src/
 └── test/         前端测试环境
 
 src-tauri/src/
-├── domain/       不依赖 Tauri 的领域类型与规则
 ├── application/  应用用例与协调逻辑
-└── ipc/          最小化 Tauri command 边界
+└── ipc/          最小化 Tauri command 与生成 DTO 边界
 ```
 
 业务增长时应按总体架构增加 `features`、`providers`、`platform`、`storage`、`security` 与 `windows` 模块，不允许 React 直接访问数据库、系统凭据或外部服务密钥。

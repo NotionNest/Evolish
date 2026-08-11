@@ -1,6 +1,6 @@
-use crate::{application, domain::AppBootstrap};
+use crate::{application, ipc::dto::AppBootstrapDto};
 
 #[tauri::command]
-pub(crate) fn get_app_bootstrap() -> AppBootstrap {
-    application::app_bootstrap()
+pub(crate) fn app_get_bootstrap() -> AppBootstrapDto {
+    application::app_bootstrap().into()
 }
