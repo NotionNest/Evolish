@@ -1,0 +1,24 @@
+[package]
+name = "evolish"
+version = "0.1.0"
+description = "Evolish desktop application core"
+edition = "2024"
+rust-version = "1.85"
+
+[lib]
+name = "evolish_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = [] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
