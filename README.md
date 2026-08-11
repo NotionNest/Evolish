@@ -41,6 +41,8 @@ cargo test --manifest-path src-tauri/Cargo.toml
 
 分支、提交和 Pull Request 规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。提交消息与 PR 标题使用 Conventional Commits，并由本地 Git hook 和 CI 同时校验。
 
+CI 会在 macOS、Windows、Ubuntu 上构建完整 Tauri 应用，并检查 npm/RustSec advisories、生产依赖许可证、Rust crate 来源和生成式 IPC 绑定漂移。安全问题请按 [Security Policy](SECURITY.md) 使用 GitHub 私密漏洞报告，不要公开提交含利用细节或凭据的 Issue。
+
 ## 代码边界
 
 ```text

@@ -44,7 +44,7 @@
 - [x] Define Issue evidence fields: requirement IDs, platform scope, acceptance commands, screenshots/fixtures, and known limitations.
 - [x] Add the canonical Apache-2.0 license text.
 - [x] Run `rg -n "Proposed|需求基线草案|当前待确认事项|待确认" docs` and verify only genuinely future decisions remain.
-- [ ] Commit: `docs: accept foundation decisions and phase one roadmap`.
+- [x] Commit: `docs: accept foundation decisions and phase one roadmap`.
 
 ### Task 2: Make Rust the generated IPC contract source
 
@@ -74,7 +74,7 @@
 - [x] Run Rust tests and verify generated bindings and mapping tests pass.
 - [x] Run `pnpm typecheck` and `pnpm tauri build --debug --no-bundle` to verify permission generation and integration.
 - [x] Add CI drift command: run binding exports, then `git diff --exit-code -- src/bridge/generated`.
-- [ ] Commit: `feat(ipc): generate typed command contracts from Rust`.
+- [x] Commit: `feat(ipc): generate typed command contracts from Rust`.
 
 ### Task 3: Add typed internationalization before feature copy grows
 
@@ -95,7 +95,7 @@
 - [x] Implement a compile-time key-safe catalog API, native `Intl` locale primitives, `zh-CN` and `en-US` catalogs, and direction metadata prepared for RTL locales.
 - [x] Replace every hardcoded user-facing App string with typed message keys.
 - [x] Run focused tests and the full frontend suite.
-- [ ] Commit: `feat(i18n): establish typed English and Chinese locales`.
+- [x] Commit: `feat(i18n): establish typed English and Chinese locales`.
 
 ### Task 4: Establish the typed error boundary
 
@@ -115,7 +115,7 @@
 - [x] Implement `normalizeIpcError(unknown): AppErrorDto`; preserve safe string detail only as diagnostic detail, never as a UI classification.
 - [x] Add an application error boundary around the root application and keep user-facing copy localized.
 - [x] Run focused tests, then `pnpm test` and Rust tests.
-- [ ] Commit: `feat(app): add typed IPC and render error boundaries`.
+- [x] Commit: `feat(app): add typed IPC and render error boundaries`.
 
 ### Task 5: Make tool and application versions internally consistent
 
@@ -133,7 +133,7 @@
 - [x] Set Rust MSRV/toolchain/CI to 1.97.1 and Node policy/types/CI to Node 22.
 - [x] Add a version consistency check for `package.json`, `Cargo.toml`, and `tauri.conf.json` application versions.
 - [x] Add the check to `pnpm check`; run tests and build.
-- [ ] Commit: `build: align application and toolchain versions`.
+- [x] Commit: `build: align application and toolchain versions`.
 
 ### Task 6: Prove full Tauri integration and supply-chain health in CI
 
@@ -146,15 +146,15 @@
 - Create: `scripts/check-js-licenses.test.mjs`
 - Modify: `README.md`
 
-- [ ] Pin every third-party Action to a full commit SHA with a version comment.
-- [ ] Add checkout, Node/pnpm setup, and `pnpm install --frozen-lockfile` to every clean platform job before running `pnpm tauri build --debug --no-bundle` on macOS, Windows, and Ubuntu.
-- [ ] Add `--locked` to Cargo commands and generated-binding drift verification.
-- [ ] Add an independent job named `Supply chain` with checkout, Node/pnpm setup, frozen dependency installation, official-registry `pnpm audit`, `cargo deny check advisories licenses sources`, and the JavaScript production-license policy script.
-- [ ] Write failing tests for allowed, disallowed, and unparseable JavaScript license reports before implementing `check-js-licenses.mjs`.
-- [ ] Add `deny.toml` with an explicit SPDX allowlist and source policy; install the current pinned `cargo-deny` through a pinned installer Action.
-- [ ] Configure monthly npm, Cargo, and GitHub Actions Dependabot updates with grouped non-major updates.
-- [ ] Document supported versions, private vulnerability reporting, and response expectations in `SECURITY.md`.
-- [ ] Commit: `ci: enforce integration and supply chain gates`.
+- [x] Pin every third-party Action to a full commit SHA with a version comment.
+- [x] Add checkout, Node/pnpm setup, and `pnpm install --frozen-lockfile` to every clean platform job before running `pnpm tauri build --debug --no-bundle` on macOS, Windows, and Ubuntu.
+- [x] Add `--locked` to Cargo commands and generated-binding drift verification.
+- [x] Add an independent job named `Supply chain` with checkout, Node/pnpm setup, frozen dependency installation, official-registry `pnpm audit`, `cargo deny check advisories licenses sources`, and the JavaScript production-license policy script.
+- [x] Write failing tests for allowed, disallowed, and unparseable JavaScript license reports before implementing `check-js-licenses.mjs`.
+- [x] Add `deny.toml` with an explicit SPDX allowlist and source policy; run the current pinned `cargo-deny` through its official pinned Action.
+- [x] Configure monthly npm, Cargo, and GitHub Actions Dependabot updates with grouped non-major updates.
+- [x] Document supported versions, private vulnerability reporting, and response expectations in `SECURITY.md`.
+- [x] Commit: `ci: enforce integration and supply chain gates`.
 - [ ] Enable GitHub dependency graph/Dependabot alerts and verify `gh api repos/NotionNest/Evolish/dependency-graph/sbom` returns the repository SBOM.
 
 ### Task 7: Remove verified initialization redundancy
