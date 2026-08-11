@@ -3,5 +3,5 @@
   "identifier": "main-window",
   "description": "Minimum core permissions for the Evolish main window.",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "allow-app-get-bootstrap"]
 }

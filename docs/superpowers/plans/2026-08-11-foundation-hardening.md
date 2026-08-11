@@ -65,15 +65,15 @@
 - Create/generated: `src/bridge/generated/AppErrorDto.ts`
 - Modify: `src/bridge/appBootstrap.ts`
 
-- [ ] Add a failing Rust test that expects application metadata to map into a separate `AppBootstrapDto` and an export test that expects generated files under `src/bridge/generated`.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml` and verify failure because DTO/export code does not exist.
-- [ ] Add `ts-rs = { version = "12.0.1", features = ["serde-compat"] }`, derive `TS` only on IPC DTOs, and export during Rust tests.
-- [ ] Rename the command to `app_get_bootstrap` everywhere and import only generated TypeScript types in the frontend wrapper.
-- [ ] Configure `tauri_build::try_build` with `AppManifest::commands(&["app_get_bootstrap"])`; include the generated allow permission only in the main-window capability.
-- [ ] Assert the checked-in capability includes `allow-app-get-bootstrap`, excludes the generated deny permission, and grants the command to no window other than `main`.
-- [ ] Run Rust tests and verify generated bindings and mapping tests pass.
-- [ ] Run `pnpm typecheck` and `pnpm tauri build --debug --no-bundle` to verify permission generation and integration.
-- [ ] Add CI drift command: run binding exports, then `git diff --exit-code -- src/bridge/generated`.
+- [x] Add a failing Rust test that expects application metadata to map into a separate `AppBootstrapDto` and an export test that expects generated files under `src/bridge/generated`.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml` and verify failure because DTO/export code does not exist.
+- [x] Add `ts-rs = { version = "12.0.1", features = ["serde-compat"] }`, derive `TS` only on IPC DTOs, and export during Rust tests.
+- [x] Rename the command to `app_get_bootstrap` everywhere and import only generated TypeScript types in the frontend wrapper.
+- [x] Configure `tauri_build::try_build` with `AppManifest::commands(&["app_get_bootstrap"])`; include the generated allow permission only in the main-window capability.
+- [x] Assert the checked-in capability includes `allow-app-get-bootstrap`, excludes the generated deny permission, and grants the command to no window other than `main`.
+- [x] Run Rust tests and verify generated bindings and mapping tests pass.
+- [x] Run `pnpm typecheck` and `pnpm tauri build --debug --no-bundle` to verify permission generation and integration.
+- [x] Add CI drift command: run binding exports, then `git diff --exit-code -- src/bridge/generated`.
 - [ ] Commit: `feat(ipc): generate typed command contracts from Rust`.
 
 ### Task 3: Add typed internationalization before feature copy grows

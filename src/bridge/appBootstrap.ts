@@ -1,12 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 
-export type AppBootstrap = {
-  name: string;
-  version: string;
-  platform: string;
-  architecture: string;
-};
+import type { AppBootstrapDto } from "./generated/AppBootstrapDto";
 
-export function getAppBootstrap(): Promise<AppBootstrap> {
-  return invoke<AppBootstrap>("get_app_bootstrap");
+export type AppBootstrap = AppBootstrapDto;
+
+export function getAppBootstrap(): Promise<AppBootstrapDto> {
+  return invoke<AppBootstrapDto>("app_get_bootstrap");
 }
