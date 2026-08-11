@@ -194,9 +194,9 @@
 - GitHub branch protection/ruleset for `main`
 - GitHub security settings
 
-- [ ] Push `agent/foundation-hardening` and open a draft PR with Conventional Commit title and full validation evidence.
-- [ ] Verify the checks named `Frontend checks`, `Rust checks (macos-latest)`, `Rust checks (windows-latest)`, `Rust checks (ubuntu-24.04)`, and `Supply chain` pass without warnings; fix failures through tests and additional conventional commits.
-- [ ] After the PR establishes exact check contexts, configure `main` to require PRs, `Commit conventions`, `Frontend checks`, all three named Rust checks, and `Supply chain`; also require linear history and resolved conversations, forbid force pushes/deletion, and require zero approvals for the solo-maintainer phase.
-- [ ] Mark the protected PR ready and squash merge using the PR title only after every required check passes.
-- [ ] Enable Dependabot alerts/security updates and verify Secret Scanning/Push Protection remain enabled.
-- [ ] Verify local `main`, `origin/main`, repository license, default branch, merge policy, and latest CI are all consistent.
+- [x] Push `agent/foundation-hardening` and open a draft PR with Conventional Commit title and full validation evidence.
+- [x] Verify the checks named `Frontend checks`, `Rust checks (macos-latest)`, `Rust checks (windows-latest)`, `Rust checks (ubuntu-24.04)`, and `Supply chain` pass without warnings; fix failures through tests and additional conventional commits.
+- [x] After the PR establishes exact check contexts, configure `main` to require PRs, `Commit conventions`, `Frontend checks`, all three named Rust checks, and `Supply chain`; also require linear history and resolved conversations, forbid force pushes/deletion, and require zero approvals for the solo-maintainer phase.
+- [x] Mark the protected PR ready and squash merge using the PR title only after every required check passes.
+- [x] Enable Dependabot alerts/security updates and verify Secret Scanning/Push Protection remain enabled.
+- [x] Verify local `main`, `origin/main`, repository license, default branch, merge policy, and latest CI are all consistent.
