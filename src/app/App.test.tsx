@@ -1,20 +1,23 @@
 import { render, screen } from "@testing-library/react";
 
+import { I18nProvider } from "../i18n/I18nProvider";
 import { App } from "./App";
 
 describe("App", () => {
   it("shows the Rust application core metadata after startup", async () => {
     render(
-      <App
-        loadBootstrap={() =>
-          Promise.resolve({
-            name: "Evolish",
-            version: "0.1.0",
-            platform: "macOS",
-            architecture: "aarch64",
-          })
-        }
-      />,
+      <I18nProvider locale="en-US">
+        <App
+          loadBootstrap={() =>
+            Promise.resolve({
+              name: "Evolish",
+              version: "0.1.0",
+              platform: "macOS",
+              architecture: "aarch64",
+            })
+          }
+        />
+      </I18nProvider>,
     );
 
     expect(screen.getByText("Starting application core…")).toBeInTheDocument();
@@ -24,14 +27,16 @@ describe("App", () => {
 
   it("surfaces an application core startup failure", async () => {
     render(
-      <App
-        loadBootstrap={() => Promise.reject(new Error("IPC unavailable"))}
-      />,
+      <I18nProvider locale="zh-CN">
+        <App
+          loadBootstrap={() => Promise.reject(new Error("IPC unavailable"))}
+        />
+      </I18nProvider>,
     );
 
     expect(
       await screen.findByText(
-        "Application core unavailable: IPC unavailable",
+        "应用核心不可用：IPC unavailable",
       ),
     ).toBeInTheDocument();
   });

@@ -4,6 +4,7 @@ import {
   getAppBootstrap,
   type AppBootstrap,
 } from "../bridge/appBootstrap";
+import { useI18n } from "../i18n/useI18n";
 import "./app.css";
 
 type LoadBootstrap = () => Promise<AppBootstrap>;
@@ -18,6 +19,7 @@ type BootstrapState =
   | { status: "error"; message: string };
 
 export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
+  const { t } = useI18n();
   const [bootstrap, setBootstrap] = useState<BootstrapState>({
     status: "loading",
   });
@@ -47,31 +49,30 @@ export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
   return (
     <main className="app-shell">
       <section className="startup-panel" aria-labelledby="app-title">
-        <p className="eyebrow">Desktop workspace</p>
+        <p className="eyebrow">{t("startup.eyebrow")}</p>
         <h1 id="app-title">Evolish</h1>
-        <p className="purpose">
-          Translation, context capture, and learning in one focused workspace.
-        </p>
+        <p className="purpose">{t("startup.purpose")}</p>
 
         <div className="runtime-status" aria-live="polite">
-          {bootstrap.status === "loading" && <p>Starting application core…</p>}
+          {bootstrap.status === "loading" && <p>{t("startup.loading")}</p>}
           {bootstrap.status === "error" && (
             <p className="error-message">
-              Application core unavailable: {bootstrap.message}
+              {t("startup.error")}
+              {bootstrap.message}
             </p>
           )}
           {bootstrap.status === "ready" && (
             <dl>
               <div>
-                <dt>Core</dt>
-                <dd>Connected</dd>
+                <dt>{t("runtime.core")}</dt>
+                <dd>{t("runtime.connected")}</dd>
               </div>
               <div>
-                <dt>Version</dt>
+                <dt>{t("runtime.version")}</dt>
                 <dd>{bootstrap.data.version}</dd>
               </div>
               <div>
-                <dt>Platform</dt>
+                <dt>{t("runtime.platform")}</dt>
                 <dd>
                   {bootstrap.data.platform} · {bootstrap.data.architecture}
                 </dd>

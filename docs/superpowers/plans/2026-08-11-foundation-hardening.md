@@ -90,11 +90,11 @@
 - Modify: `src/app/App.tsx`
 - Modify: `src/app/App.test.tsx`
 
-- [ ] Write failing tests for exact locale resolution, Chinese language fallback, unsupported locale fallback to `en-US`, document `lang`/`dir`, translated startup states, and missing-key behavior.
-- [ ] Run focused tests and verify failures.
-- [ ] Implement a compile-time key-safe catalog API, native `Intl` locale primitives, `zh-CN` and `en-US` catalogs, and direction metadata prepared for RTL locales.
-- [ ] Replace every hardcoded user-facing App string with typed message keys.
-- [ ] Run focused tests and the full frontend suite.
+- [x] Write failing tests for exact locale resolution, Chinese language fallback, unsupported locale fallback to `en-US`, document `lang`/`dir`, translated startup states, and missing-key behavior.
+- [x] Run focused tests and verify failures.
+- [x] Implement a compile-time key-safe catalog API, native `Intl` locale primitives, `zh-CN` and `en-US` catalogs, and direction metadata prepared for RTL locales.
+- [x] Replace every hardcoded user-facing App string with typed message keys.
+- [x] Run focused tests and the full frontend suite.
 - [ ] Commit: `feat(i18n): establish typed English and Chinese locales`.
 
 ### Task 4: Establish the typed error boundary
