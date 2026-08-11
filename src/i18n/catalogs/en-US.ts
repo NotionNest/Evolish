@@ -3,7 +3,8 @@ export const enUSMessages = {
   "startup.purpose":
     "Translation, context capture, and learning in one focused workspace.",
   "startup.loading": "Starting application core…",
-  "startup.error": "Application core unavailable:",
+  "error.ipc.unavailable": "Unable to connect to the application core.",
+  "error.unexpected": "An unexpected application error occurred.",
   "runtime.core": "Core",
   "runtime.connected": "Connected",
   "runtime.version": "Version",

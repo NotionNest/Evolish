@@ -109,12 +109,12 @@
 - Modify: `src/main.tsx`
 - Modify: `src/app/App.tsx`
 
-- [ ] Write failing tests for serialized Tauri string/object rejections, unknown rejection fallback, and render-error containment.
-- [ ] Run focused Vitest tests and verify the expected failures.
-- [ ] Implement `AppErrorDto` with stable code, message key, retryability, suggested action, source, and no raw cause.
-- [ ] Implement `normalizeIpcError(unknown): AppErrorDto`; preserve safe string detail only as diagnostic detail, never as a UI classification.
-- [ ] Add an application error boundary around the root application and keep user-facing copy localized.
-- [ ] Run focused tests, then `pnpm test` and Rust tests.
+- [x] Write failing tests for serialized Tauri string/object rejections, unknown rejection fallback, and render-error containment.
+- [x] Run focused Vitest tests and verify the expected failures.
+- [x] Implement `AppErrorDto` with stable code, message key, retryability, suggested action, source, and no raw cause.
+- [x] Implement `normalizeIpcError(unknown): AppErrorDto`; preserve safe string detail only as diagnostic detail, never as a UI classification.
+- [x] Add an application error boundary around the root application and keep user-facing copy localized.
+- [x] Run focused tests, then `pnpm test` and Rust tests.
 - [ ] Commit: `feat(app): add typed IPC and render error boundaries`.
 
 ### Task 5: Make tool and application versions internally consistent

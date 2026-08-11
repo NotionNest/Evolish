@@ -35,9 +35,7 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByText(
-        "应用核心不可用：IPC unavailable",
-      ),
+      await screen.findByText("无法连接到应用核心。"),
     ).toBeInTheDocument();
   });
 });

@@ -4,6 +4,9 @@ import {
   getAppBootstrap,
   type AppBootstrap,
 } from "../bridge/appBootstrap";
+import { normalizeIpcError } from "../bridge/errors";
+import type { AppErrorDto } from "../bridge/generated/AppErrorDto";
+import { isMessageKey } from "../i18n/messages";
 import { useI18n } from "../i18n/useI18n";
 import "./app.css";
 
@@ -16,7 +19,7 @@ type AppProps = {
 type BootstrapState =
   | { status: "loading" }
   | { status: "ready"; data: AppBootstrap }
-  | { status: "error"; message: string };
+  | { status: "error"; error: AppErrorDto };
 
 export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
   const { t } = useI18n();
@@ -35,9 +38,7 @@ export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
       })
       .catch((error: unknown) => {
         if (isActive) {
-          const message =
-            error instanceof Error ? error.message : "Unknown startup error";
-          setBootstrap({ status: "error", message });
+          setBootstrap({ status: "error", error: normalizeIpcError(error) });
         }
       });
 
@@ -57,8 +58,11 @@ export function App({ loadBootstrap = getAppBootstrap }: AppProps) {
           {bootstrap.status === "loading" && <p>{t("startup.loading")}</p>}
           {bootstrap.status === "error" && (
             <p className="error-message">
-              {t("startup.error")}
-              {bootstrap.message}
+              {t(
+                isMessageKey(bootstrap.error.messageKey)
+                  ? bootstrap.error.messageKey
+                  : "error.unexpected",
+              )}
             </p>
           )}
           {bootstrap.status === "ready" && (
