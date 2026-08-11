@@ -177,15 +177,15 @@
 **Files:**
 - Modify if required by failures only.
 
-- [ ] Run `pnpm install --frozen-lockfile`.
-- [ ] Run `pnpm check`.
-- [ ] Run `cargo fmt --manifest-path src-tauri/Cargo.toml --check`.
-- [ ] Run `cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features --locked -- -D warnings`.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml --locked`.
-- [ ] Run `pnpm tauri build --debug --no-bundle`.
-- [ ] Run `pnpm audit --audit-level low --registry=https://registry.npmjs.org`.
-- [ ] Run `git diff --check`, `git grep -nIE '(AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9_]{36,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' -- . ':!pnpm-lock.yaml'`, and confirm a clean intended diff.
-- [ ] Commit only evidence/document corrections if required.
+- [x] Run `pnpm install --frozen-lockfile`.
+- [x] Run `pnpm check`.
+- [x] Run `cargo fmt --manifest-path src-tauri/Cargo.toml --check`.
+- [x] Run `cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features --locked -- -D warnings`.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml --locked`.
+- [x] Run `pnpm tauri build --debug --no-bundle`.
+- [x] Run `pnpm audit --audit-level low --registry=https://registry.npmjs.org`.
+- [x] Run `git diff --check`, `git grep -nIE '(AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9_]{36,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' -- . ':!pnpm-lock.yaml'`, and confirm a clean intended diff.
+- [x] Commit only evidence/document corrections if required.
 
 ### Task 9: Publish through the new workflow and protect main
 
