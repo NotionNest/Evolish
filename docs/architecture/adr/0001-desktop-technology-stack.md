@@ -6,7 +6,7 @@
 
 ## 背景
 
-Evolish 阶段一需要在 macOS、Windows 和 Linux 上实现跨应用取词、全局快捷键、系统托盘、三类窗口、截图 OCR、TTS、本地词典和多个翻译服务并行查询。阶段二将在同一产品中增加 AI 知识卡和复习学习系统。因此，基础技术栈既要能深入访问操作系统，也要支持长期演进的内容型复杂界面。
+Evolish 阶段一需要在 macOS、Windows 和 Linux 上实现跨应用取词、全局快捷键、系统托盘、多窗口、截图 OCR、TTS、本地词典和受控的多 AI 服务查询。阶段二将在同一产品中增加 AI 知识卡和复习学习系统。因此，基础技术栈既要能深入访问操作系统，也要支持长期演进的内容型复杂界面。AI-only 与按需请求范围由后续 [ADR-0005](./0005-ai-only-translation-and-on-demand-query.md) 约束；最终双窗口范围由 [ADR-0006](./0006-two-window-product-model.md) 约束。
 
 ## 决策
 
@@ -45,4 +45,3 @@ Rust 核心是业务状态和敏感数据的唯一可信来源。React WebView �
 - [Tauri Architecture](https://v2.tauri.app/concept/architecture/)
 - [Tauri Process Model](https://v2.tauri.app/concept/process-model/)
 - [Tauri Capabilities](https://v2.tauri.app/security/capabilities/)
-

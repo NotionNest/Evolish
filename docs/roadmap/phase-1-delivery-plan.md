@@ -3,6 +3,7 @@
 > 状态：Accepted
 > 日期：2026-08-11
 > 需求来源：[阶段一 PRD](../reference/pm/phase-1-prd.md)与[功能对齐基线](../reference/pm/easydict-feature-baseline.md)
+> 输入翻译细则：[文本输入翻译 PRD](../reference/pm/text-input-translation-prd.md)
 
 ## 交付规则
 
@@ -35,45 +36,51 @@
 
 覆盖 `CAP-01`、`CAP-02`、`CAP-08`—`CAP-10`、`QRY-01`—`QRY-05`、`ACT-01`—`ACT-06`、`ACT-09`、`ACT-10`、`ACT-12`、`ACT-13`。
 
-交付手动输入、快捷键取词、深度链接和外部调用，共享语言/意图判断，并在主窗口完成查询、换行、清理、聚焦、复制、重试、语言交换和关闭行为。
+交付手动输入、快捷键取词、深度链接和外部调用，共享语言/意图判断，并在主窗口完成明确提交、换行、清理、聚焦、复制、重试、语言交换和关闭行为。文本输入过程不自动发起 AI 请求。
 
 ### Epic 3：查询监督与结果模型
 
 覆盖 `QRY-06`—`QRY-10`、`SRV-23`、`ACT-07`、`NFR-01`。
 
-交付 `QuerySupervisor`、并行调度、有序逐项返回、取消与过期隔离、语言能力映射、统一结果结构、首个成功结果复制和交互延迟测量。
+交付 `QuerySupervisor`、主 AI 优先与其他服务按需调度、完整响应原子展示、取消与过期隔离、语言能力映射、自适应统一结果结构、主要结果复制和交互延迟测量。未展开的其他服务不得产生请求。
 
 ### Epic 4：Provider 与设置系统
 
-覆盖 `SRV-04`—`SRV-22`、`APP-06`、`SET-01`—`SET-07`。
+覆盖适用的 `SRV-04`—`SRV-10`、`SRV-22`—`SRV-25`、`APP-06`、`SET-01`—`SET-07`，并验证 `SRV-03`、`SRV-11`—`SRV-21` 的产品排除边界。
 
-按编译期内置 provider 接入 OpenAI、Gemini、DeepSeek、Ollama、Groq、智谱 AI、GitHub Models、DeepL、Google、有道、腾讯、Bing、百度、小牛、彩云、阿里、火山和豆包；同时交付 provider descriptor、凭据、连通测试、服务排序/启停、窗口 profile、快捷键、语言和查询行为设置。
+按编译期内置 provider 原生接入 OpenAI、Anthropic 和 Gemini，并交付可创建多个实例的 OpenAI-compatible 自定义服务；DeepSeek、Ollama、Groq、智谱 AI、GitHub Models 等兼容模型通过自定义 profile 使用。同步交付 provider descriptor、凭据、连通测试、主服务设置、服务排序/启停、窗口 profile、翻译模式和查询行为设置。传统翻译 provider 不提供配置或请求入口。
 
-### Epic 5：窗口、自动取词与截图壳层
+### Epic 5：历史与收藏基础
 
-覆盖 `APP-03`、`APP-04`、`APP-08`、`CAP-03`—`CAP-07`、`OCR-01`、`SET-08`、`ACT-11`。
+覆盖文本输入翻译 PRD 的 `TIT-HIS-01`—`TIT-HIS-07`、`TIT-FAV-01`—`TIT-FAV-05` 以及 `EVO-HIS-01`、`EVO-HIS-02`、`EVO-FAV-01`。
 
-交付迷你窗口、侧悬浮窗口、多显示器/DPI 定位、自动划词手势、截图遮罩、置顶和窗口配置。macOS 完整验收后移植 Windows，最后完成 Linux X11 与 Wayland 能力矩阵。
+交付默认本地历史、搜索与筛选、保留期限、关闭历史、临时隐私模式、结果版本收藏和收藏筛选。收藏只引用稳定结果版本，不生成知识卡、不创建复习队列。
 
-### Epic 6：OCR 管线
+### Epic 6：窗口、自动取词与截图壳层
+
+覆盖 `APP-03`、`APP-08`、`CAP-03`—`CAP-07`、`OCR-01`、`SET-08`、`ACT-11`，并验证 `APP-04` 的产品排除边界。
+
+交付统一迷你窗口、多显示器/DPI 定位、自动/快捷键划词、截图结果承载、截图遮罩、置顶、转到主窗口和双窗口配置。不得创建侧悬浮结果窗口；截图遮罩是一次性捕获表面，不是第三个产品窗口。macOS 完整验收后移植 Windows，最后完成 Linux X11 与 Wayland 能力矩阵。
+
+### Epic 7：OCR 管线
 
 覆盖 `OCR-02`—`OCR-07`、`SET-09` 中的 OCR 配置。
 
 交付本地 OCR、截图翻译、静默 OCR、十二种基线语言 fixture、指定语言重识别，以及无文本、权限拒绝和引擎失败的可执行错误状态。
 
-### Epic 7：词典与语音
+### Epic 8：词典与语音
 
 覆盖 `SRV-01`—`SRV-03`、`TTS-01`—`TTS-08`、`ACT-08`、`ACT-14`、`SET-09` 中的 TTS 配置。
 
-交付 Apple Dictionary/Translate 的 macOS 明示能力、跨平台 MDict、平台系统 TTS、Bing/Google/有道/百度 TTS、自动/手动朗读和外部词典调用。
+交付 Apple Dictionary 的 macOS 明示能力、跨平台 MDict、平台系统 TTS、Bing/Google/有道/百度 TTS、自动/手动朗读和外部词典调用。Apple Translate 属于已确认的产品排除项。
 
-### Epic 8：平台集成与完整硬化
+### Epic 9：平台集成与完整硬化
 
 重新验证 `APP-01`—`APP-08`、`CAP-01`—`CAP-10`、`ACT-01`—`ACT-14`、`SET-01`—`SET-13`、`NFR-01`—`NFR-08` 在各自平台范围的组合行为。
 
 建立浏览器、Office、PDF、编辑器、聊天软件和系统应用兼容矩阵；覆盖权限恢复、剪贴板保护、焦点、多显示器、安装升级、深度链接、单实例、自动更新、诊断包和可访问性。
 
-### Epic 9：公开发布
+### Epic 10：公开发布
 
 对 `OCR-01`—`OCR-07`、`QRY-01`—`QRY-10`、`SRV-01`—`SRV-23`、`TTS-01`—`TTS-08` 以及所有跨 Epic 行为执行最终回归。
 

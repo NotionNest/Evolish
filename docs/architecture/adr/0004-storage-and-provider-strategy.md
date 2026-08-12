@@ -3,6 +3,7 @@
 - 状态：Accepted
 - 决策日期：2026-08-11
 - 决策者：项目所有者
+- 后续约束：[ADR-0005：AI-only 翻译与按需请求](./0005-ai-only-translation-and-on-demand-query.md)
 
 ## 背景
 
@@ -12,7 +13,7 @@
 
 SQLite 是阶段一结构化持久化方案，连接、迁移、事务与查询只由 Rust storage 层拥有。敏感凭据仅保存到平台凭据库，SQLite 只保存不可逆推出秘密的引用。
 
-阶段一 provider 在编译期注册，并按 `DictionaryProvider`、`TranslationProvider`、`AiProvider`、`SpeechProvider` 等能力接口实现。UI 消费 descriptor 生成配置界面，Rust 执行最终校验。阶段一不加载第三方动态二进制或脚本插件。
+阶段一 provider 在编译期注册，并按 `DictionaryProvider`、`AiTranslationProvider`、`SpeechProvider` 等能力接口实现。AI 翻译 provider 的具体范围和按需调度由后续 [ADR-0005](./0005-ai-only-translation-and-on-demand-query.md) 约束。UI 消费 descriptor 生成配置界面，Rust 执行最终校验。阶段一不加载第三方动态二进制或脚本插件。
 
 ## 结果
 

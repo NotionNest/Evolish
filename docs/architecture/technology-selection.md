@@ -19,17 +19,17 @@
 - **敏感凭据：系统凭据库（macOS Keychain、Windows Credential Manager、Linux Secret Service）**
 - **测试：Rust 单元/契约测试 + Vitest/React Testing Library + 平台集成测试**
 
-该组合不是因为 Pot 使用了 Tauri，而是因为 Evolish 的核心工作发生在系统层和业务层：跨应用取词、截图、OCR、TTS、并行查询、凭据、SQLite 和未来学习数据。Rust 适合成为唯一可信核心，WebView 只承担高迭代速度的界面。
+该组合不是因为 Pot 使用了 Tauri，而是因为 Evolish 的核心工作发生在系统层和业务层：跨应用取词、截图、OCR、TTS、受控 AI 查询、凭据、SQLite 和未来学习数据。Rust 适合成为唯一可信核心，WebView 只承担高迭代速度的界面。
 
 ## 2. 选择标准
 
-权重以阶段一 101 项功能基线为依据。
+权重以阶段一功能基线为依据。
 
 | 标准 | 权重 | 说明 |
 |---|---:|---|
 | 系统 API 与原生桥接 | 25% | 辅助功能、截图、OCR、TTS、词典、凭据库 |
-| 多窗口与悬浮工具体验 | 20% | 迷你窗口、侧悬浮窗口、主窗口、多显示器 |
-| 性能与常驻资源 | 15% | 长期驻留托盘、低延迟唤起、并行服务 |
+| 双窗口与上下文工具体验 | 20% | 主窗口、迷你窗口、多显示器、截图捕获表面 |
+| 性能与常驻资源 | 15% | 长期驻留托盘、低延迟唤起、按需 AI 服务 |
 | UI 与未来学习系统扩展 | 15% | 复杂设置、知识卡、复习和可视化 |
 | 跨平台成熟度 | 10% | macOS、Windows、Linux 的构建与分发 |
 | 单人长期维护成本 | 10% | 调试、类型安全、依赖和升级成本 |
@@ -63,15 +63,15 @@ Flutter 官方支持 Windows、macOS 和 Linux，也支持自定义桌面插件�
 
 ```mermaid
 flowchart TB
-    UI["React UI<br/>主窗口 / 侧悬浮窗 / 迷你窗 / 设置"]
+    UI["React UI<br/>主窗口（含设置）/ 迷你窗口"]
     IPC["Typed Tauri IPC<br/>命令 + 事件流"]
     APP["Rust Application Core<br/>查询会话 / 编排 / 配置 / 权限"]
-    ENGINE["Query Engine<br/>语言判断 / 意图 / 并发 / 取消 / 重试"]
-    SERVICES["Service Adapters<br/>词典 / 翻译 / AI / TTS"]
+    ENGINE["Query Engine<br/>语言判断 / 主服务 / 按需请求 / 取消 / 重试"]
+    SERVICES["Service Adapters<br/>词典 / AI 翻译 / TTS"]
     STORE["Local Data<br/>SQLite + migrations"]
     SECRETS["OS Credential Store"]
     PLATFORM["Platform Capability Interface"]
-    MAC["macOS<br/>AX / Vision / Speech / Dictionary / Apple Translate"]
+    MAC["macOS<br/>AX / Vision / Speech / Dictionary"]
     WIN["Windows<br/>UI Automation / WinRT OCR / Speech / Win32"]
     LINUX["Linux<br/>AT-SPI / X11-Wayland / OCR / Speech"]
 
@@ -124,7 +124,6 @@ Evolish/
 │   ├── features/
 │   ├── windows/
 │   │   ├── main/
-│   │   ├── floating/
 │   │   └── mini/
 │   ├── components/
 │   └── bridge/                  # 生成的 IPC 类型与事件客户端
@@ -171,7 +170,7 @@ Evolish/
 
 - 使用 CSS Variables 建立设计令牌。
 - 可使用 Tailwind 处理布局与状态样式，但组件 API 不与 Tailwind class 字符串绑定。
-- 三类窗口共享组件和数据模型，布局按窗口角色组合，不复制三套业务实现。
+- 主窗口与迷你窗口共享组件和数据模型，布局按两个窗口角色组合；设置作为主窗口路由，不创建独立 WebView。
 
 ## 7. 平台实现边界
 
@@ -180,7 +179,7 @@ Evolish/
 - Accessibility API（AXUIElement）读取选区和选区位置。
 - Vision Framework 执行本地 OCR。
 - AVSpeechSynthesizer / 系统语音接口提供 TTS。
-- Apple Dictionary 与 Apple Translate 使用独立原生桥接。
+- Apple Dictionary 使用独立原生桥接；Apple Translate 不接入。
 - 使用 Keychain 保存凭据。
 - 透明非激活面板、跨 Space 和焦点行为需要原生窗口扩展，不只依赖默认 WebView 窗口。
 
