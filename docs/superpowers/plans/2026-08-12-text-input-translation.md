@@ -176,11 +176,11 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/infrastructure/ai/openai.rs`, `openai_compatible.rs`
 - Test: adapters through the Task 8 contract
 
-- [ ] Register both unimplemented adapters in the shared contract and run the focused suite; confirm RED for missing request/response/error behavior.
-- [ ] Implement native OpenAI and the explicitly supported OpenAI-compatible subset, including structure, cancellation and connection capability test.
-- [ ] Simulate chunked delivery and prove neither adapter returns正文 before full response validation.
-- [ ] Run both shared contracts, redirect tests and secret-canary scan; expect GREEN.
-- [ ] Commit: `feat(providers): add OpenAI translation adapters`.
+- [x] Register both unimplemented adapters in the shared contract and run the focused suite; confirm RED for missing request/response/error behavior.
+- [x] Implement native OpenAI and the explicitly supported OpenAI-compatible subset, including structure, cancellation and connection capability test.
+- [x] Simulate chunked delivery and prove neither adapter returns正文 before full response validation.
+- [x] Run both shared contracts, redirect tests and secret-canary scan; expect GREEN.
+- [x] Commit: `feat(providers): add OpenAI translation adapters`.
 
 ### Task 8.2: Implement the Anthropic native adapter
 
