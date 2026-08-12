@@ -75,12 +75,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/domain/error.rs`, `src-tauri/src/application/translation/result_validator.rs`
 - Test: adjacent Rust test modules
 
-- [ ] Write failing schema tests for valid Word/Phrase/Sentence/LongText V1 payloads and invalid empty translation, missing/duplicate paragraph indexes, intent mismatch and unknown values.
-- [ ] Write failing transition tests for `NotRequested → Queued → Running → Succeeded/Failed/Cancelled`; retry must create a new attempt ID/version.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml translation --locked`; confirm RED.
-- [ ] Implement tagged Serde enums, semantic validation and typed errors; provider data must never panic the core.
-- [ ] Verify camelCase serialization snapshots and Clippy.
-- [ ] Commit: `feat(domain): add versioned adaptive translation results`.
+- [x] Write failing schema tests for valid Word/Phrase/Sentence/LongText V1 payloads and invalid empty translation, missing/duplicate paragraph indexes, intent mismatch and unknown values.
+- [x] Write failing transition tests for `NotRequested → Queued → Running → Succeeded/Failed/Cancelled`; retry must create a new attempt ID/version.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml translation --locked`; confirm RED.
+- [x] Implement tagged Serde enums, semantic validation and typed errors; provider data must never panic the core.
+- [x] Verify camelCase serialization snapshots and Clippy.
+- [x] Commit: `feat(domain): add versioned adaptive translation results`.
 
 ### Task 4: Implement local language detection, direction and classification
 
