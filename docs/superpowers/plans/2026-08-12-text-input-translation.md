@@ -59,12 +59,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Modify: `src-tauri/src/domain/mod.rs`
 - Test: adjacent Rust test modules
 
-- [ ] Write failing tests for UUID v7 generation/parse, unique BCP 47 tags for all 48 languages, writing direction, provider-code mapping failure and stable serialization.
-- [ ] Write failing intent fixtures for Chinese/English words, phrases, sentences, paragraphs, mixed Unicode, code and manual override.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml domain:: --locked`; expect missing types/rules.
-- [ ] Implement closed enums and validated value objects: session/attempt/profile/mode IDs, result version, language selection/direction and query intent.
-- [ ] Rerun domain tests and Clippy; expect deterministic fixtures and explicit invalid-value errors.
-- [ ] Commit: `feat(domain): define translation language and intent models`.
+- [x] Write failing tests for UUID v7 generation/parse, unique BCP 47 tags for all 48 languages, writing direction, provider-code mapping failure and stable serialization.
+- [x] Write failing intent fixtures for Chinese/English words, phrases, sentences, paragraphs, mixed Unicode, code and manual override.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml domain:: --locked`; expect missing types/rules.
+- [x] Implement closed enums and validated value objects: session/attempt/profile/mode IDs, result version, language selection/direction and query intent.
+- [x] Rerun domain tests and Clippy; expect deterministic fixtures and explicit invalid-value errors.
+- [x] Commit: `feat(domain): define translation language and intent models`.
 
 ### Task 3: Define adaptive results and attempt state machine
 

@@ -1,5 +1,5 @@
 mod application;
-pub(crate) mod domain;
+pub mod domain;
 pub(crate) mod infrastructure;
 pub mod ipc;
 
