@@ -110,13 +110,13 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/migrations/0001_translation_core.sql` containing the complete immutable core schema for translation modes, provider profiles and the closed `main`/`mini` workspace-role model
 - Test: mode/compiler/repository modules
 
-- [ ] Write failing seed tests for stable standard/literal/natural/academic/concise IDs, immutable built-ins, custom-copy behavior and version increments.
-- [ ] Write failing prompt boundary tests proving user instructions cannot replace schema, language or system contract and user正文 is treated as data.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml translation_mode --locked`; confirm RED.
-- [ ] Add failing schema/state tests proving `window_role` accepts only `main`/`mini` and rejects removed or unknown roles. Seed one `main` workspace profile for this feature: fresh install permits null primary/empty enabled list and returns a configurable unconfigured state; configured state requires a unique valid primary in the ordered enabled list, different primary/secondary languages, valid default mode and optimistic-lock version. The Mini epic later inserts the `mini` profile without changing this role contract.
-- [ ] Implement the complete `0001` core schema (mode, provider-profile and workspace-profile tables), then mode snapshots, layered `PromptCompiler`, template validation and repository ordering/deletion conflict. Later tasks must not rewrite this applied migration.
-- [ ] Run temporary-SQLite migration/repository tests and Clippy.
-- [ ] Commit: `feat(translation): add versioned translation modes`.
+- [x] Write failing seed tests for stable standard/literal/natural/academic/concise IDs, immutable built-ins, custom-copy behavior and version increments.
+- [x] Write failing prompt boundary tests proving user instructions cannot replace schema, language or system contract and user正文 is treated as data.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml translation_mode --locked`; confirm RED.
+- [x] Add failing schema/state tests proving `window_role` accepts only `main`/`mini` and rejects removed or unknown roles. Seed one `main` workspace profile for this feature: fresh install permits null primary/empty enabled list and returns a configurable unconfigured state; configured state requires a unique valid primary in the ordered enabled list, different primary/secondary languages, valid default mode and optimistic-lock version. The Mini epic later inserts the `mini` profile without changing this role contract.
+- [x] Implement the complete `0001` core schema (mode, provider-profile and workspace-profile tables), then mode snapshots, layered `PromptCompiler`, template validation and repository ordering/deletion conflict. Later tasks must not rewrite this applied migration.
+- [x] Run temporary-SQLite migration/repository tests and Clippy.
+- [x] Commit: `feat(translation): add versioned translation modes`.
 
 ### Task 6: Establish SQLite and credential boundaries
 
