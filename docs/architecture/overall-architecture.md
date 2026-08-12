@@ -3,6 +3,8 @@
 > 状态：Accepted
 > 日期：2026-08-11
 > 已确认基础栈：[ADR-0001](./adr/0001-desktop-technology-stack.md)
+> AI 翻译编排：[ADR-0005](./adr/0005-ai-only-translation-and-on-demand-query.md)
+> 窗口模型：[ADR-0006](./adr/0006-two-window-product-model.md)
 > 产品范围：[阶段一 PRD](../reference/pm/phase-1-prd.md)
 > 功能范围：[Easydict 功能对齐基线](../reference/pm/easydict-feature-baseline.md)
 
@@ -12,8 +14,8 @@
 
 1. 三个桌面平台共享查询、服务、数据和大部分 UI 逻辑。
 2. 取词、OCR、TTS、词典、凭据和特殊窗口允许使用平台原生实现。
-3. 三类窗口看到同一份核心状态，不在各 WebView 内复制业务状态。
-4. 多个服务并行执行、逐项返回，单服务失败不阻塞其他服务。
+3. 主窗口与迷你窗口看到同一份核心状态，不在各 WebView 内复制业务状态。
+4. 首次只执行主 AI 服务，其他服务由用户展开后按需执行；各服务状态相互隔离。
 5. 新查询能可靠取消或隔离旧查询，旧结果不能污染当前窗口。
 6. 密钥和敏感系统能力不进入前端 WebView。
 7. 阶段二可消费阶段一的结构化查询数据，而无需重写查询核心。
@@ -24,8 +26,8 @@
 采用 **模块化单体 + Ports/Adapters（端口与适配器）**。
 
 - **模块化单体**：应用只有一个 Rust 核心进程，统一持有数据库、配置、任务和窗口协调器。
-- **Ports/Adapters**：领域与应用层只依赖能力接口；翻译服务、数据库和操作系统分别实现这些接口。
-- **前端多视图**：主窗口、侧悬浮窗口、迷你窗口和设置页是同一核心的不同视图，不是独立应用。
+- **Ports/Adapters**：领域与应用层只依赖能力接口；AI 服务、数据库和操作系统分别实现这些接口。
+- **前端双窗口**：主窗口与迷你窗口是同一核心的两个受控视图；设置是主窗口内路由，截图遮罩是一次性捕获表面，不是结果窗口。
 
 明确不采用：
 
@@ -43,7 +45,7 @@ flowchart LR
     APPS["其他桌面应用<br/>浏览器 / PDF / Office / 编辑器"]
     EVOLISH["Evolish Desktop"]
     OS["操作系统能力<br/>Accessibility / OCR / TTS / Credential Store"]
-    PROVIDERS["外部服务<br/>词典 / 翻译 / AI / 在线 TTS"]
+    PROVIDERS["外部服务<br/>AI / 在线 TTS"]
     LOCAL["本地资源<br/>SQLite / MDict / Ollama"]
 
     USER --> EVOLISH
@@ -60,10 +62,8 @@ flowchart LR
 flowchart TB
     subgraph WEBVIEWS["Tauri WebView Processes"]
         MAIN["Main Window"]
-        FLOAT["Floating Window"]
         MINI["Mini Window"]
-        SETTINGS["Settings Window"]
-        OVERLAY["Capture Overlay"]
+        OVERLAY["Transient Capture Overlay"]
     end
 
     subgraph CORE["Tauri Core Process (Rust)"]
@@ -78,7 +78,7 @@ flowchart TB
         PLATFORM["PlatformServices"]
     end
 
-    MAIN & FLOAT & MINI & SETTINGS & OVERLAY <--> IPC["Typed Commands / Channels / Targeted Events"]
+    MAIN & MINI & OVERLAY <--> IPC["Typed Commands / Channels / Targeted Events"]
     IPC <--> KERNEL
     KERNEL --> WINDOW
     KERNEL --> CAPTURE
@@ -116,8 +116,10 @@ flowchart TB
 - `ProviderCapability`
 - `ProviderRequest`
 - `ProviderResult`
+- `TranslationAttempt`
 - `DictionaryEntry`
-- `TranslationResult`
+- `AdaptiveTranslationResult`
+- `FavoriteReference`
 - `SpeechRequest`
 - `AppError`
 
@@ -144,9 +146,9 @@ flowchart TB
 
 - 文本规范化与语言判断；
 - 意图分类：词、句子、长文本、明确翻译；
-- 根据窗口 profile 选择 provider；
-- 并行调度、每服务超时和并发限制；
-- 有序事件输出；
+- 根据窗口 profile 选择主 AI provider 和可按需请求的其他 provider；
+- 默认只调度主 provider，接收用户展开动作后才调度指定的其他 provider；
+- 管理每服务超时、并发限制、attempt 版本和完整结果事件；
 - 取消旧会话；
 - 防止过期结果写入当前窗口；
 - 生成可脱敏诊断信息。
@@ -159,8 +161,7 @@ flowchart TB
 
 ```text
 DictionaryProvider
-TranslationProvider
-AiProvider
+AiTranslationProvider
 SpeechProvider
 ```
 
@@ -176,7 +177,7 @@ SpeechProvider
 - 是否为本地服务；
 - 隐私说明。
 
-阶段一 provider 在编译期注册。UI 根据 descriptor 生成一致的配置表单，Rust 后端执行最终校验。
+阶段一 provider 在编译期注册。AI 翻译原生 adapter 为 OpenAI、Anthropic 和 Gemini，并提供 OpenAI-compatible 通用 adapter；传统翻译 adapter 不进入 registry。UI 根据 descriptor 生成一致的配置表单，Rust 后端执行最终校验。
 
 ### 5.5 `platform`
 
@@ -188,7 +189,6 @@ ScreenCapturePort
 OcrPort
 SpeechPort
 SystemDictionaryPort
-SystemTranslationPort
 PermissionPort
 WindowBehaviorPort
 CredentialPort
@@ -274,7 +274,8 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Queued
+    [*] --> NotRequested
+    NotRequested --> Queued: 主服务提交或用户展开
     Queued --> Running
     Running --> Succeeded
     Running --> Empty
@@ -283,10 +284,12 @@ stateDiagram-v2
     Running --> Cancelled
 ```
 
-### 7.3 并发与取消
+### 7.3 按需调度、并发与取消
 
 - 每个 `QuerySession` 创建一个根 `CancellationToken`。
-- 每个 provider 使用子 token。
+- 每个实际创建的 provider attempt 使用子 token；`NotRequested` 服务不创建任务或网络请求。
+- 提交时只创建主服务 attempt；用户展开其他服务时创建该服务 attempt。
+- 主服务失败不触发自动回退；重试只创建用户明确选择的服务 attempt。
 - 新查询替换同一窗口槽位时取消旧根 token。
 - provider 任务必须对取消和超时作出响应。
 - 使用 session ID 和窗口 generation 双重校验；即使第三方请求无法及时停止，旧结果也被丢弃。
@@ -300,10 +303,10 @@ stateDiagram-v2
 | 方式 | 用途 | 示例 |
 |---|---|---|
 | Tauri Command | 短请求/响应、有明确调用者 | 读取设置、开始查询、保存配置、复制结果 |
-| Tauri Channel | 有序、连续的单会话输出 | provider 开始、部分结果、完成、错误 |
+| Tauri Channel | 有序、连续的单会话状态输出 | provider 未请求、开始、完整结果、完成、错误 |
 | 定向 Event | 小型、低频、跨生命周期通知 | 主题变化、权限变化、窗口请求、配置刷新 |
 
-查询结果使用 Channel。Tauri 官方说明普通事件面向小数据和多生产者/消费者，不适合低延迟高吞吐；Channel 为有序流式数据设计。
+查询状态和完整结果使用 Channel。Tauri 官方说明普通事件面向小数据和多生产者/消费者，不适合有序会话通信；Channel 用于保证状态顺序，但不向 UI 传递可渲染的正文 token 流。
 
 ### 8.2 类型系统
 
@@ -345,16 +348,16 @@ permission_open_settings
 | 角色 | 生命周期 | 焦点策略 | 权限能力 |
 |---|---|---|---|
 | Main | 长生命周期，可隐藏 | 输入翻译时主动聚焦 | 查询、设置读取、结果操作 |
-| Floating | 复用，通常隐藏 | 默认聚焦，可配置置顶 | 查询、结果操作、窗口行为 |
-| Mini | 预创建或首次使用后复用 | 默认非激活 | 最小查询和结果操作 |
-| Settings | 按需创建 | 标准应用窗口 | 设置与凭据管理 |
+| Mini | 预创建或首次使用后复用 | 默认非激活；需要编辑 OCR 原文时可显式激活 | 自动/快捷键划词、截图翻译、适用结果操作、转到主窗口 |
 | Capture Overlay | 一次截图会话 | 截图期间独占交互 | 仅截图会话相关命令 |
+
+产品没有 `Floating` 或独立 `Settings` 窗口。设置、历史、收藏、Provider 管理和后续学习模块都在 Main 内。Capture Overlay 只能选择区域，完成或取消后立即销毁，不能承载查询结果。
 
 ### 9.2 前端入口
 
 - 使用同一个 React/Vite 构建产物。
-- 根据 Tauri window label 选择对应 root component。
-- 功能组件共享，窗口布局分别组合。
+- 根据 Tauri window label 选择 Main 或 Mini root component；Capture Overlay 使用隔离的最小捕获入口。
+- Main 与 Mini 共享结果组件，按窗口职责组合；设置页面只进入 Main bundle。
 - 大型设置页和阶段二模块使用代码分割，迷你窗口不加载无关模块。
 - 每个 WebView 有独立 JS 内存；共享业务状态必须来自 Rust snapshot + stream。
 
@@ -373,7 +376,7 @@ permission_open_settings
 src/
 ├── app/                 # bootstrap、主题、i18n、错误边界
 ├── bridge/              # 生成类型、commands、channels、events
-├── windows/             # main / floating / mini / settings / capture
+├── windows/             # main / mini / capture（瞬时截图遮罩）
 ├── features/
 │   ├── query/
 │   ├── result/
@@ -413,25 +416,30 @@ UI 基础：
 - 前端只能通过 use case 访问数据。
 - 密钥不进入 SQLite；表中只保存 `secret_ref`。
 - 截图图片默认不持久化。
-- 查询历史是否持久化由隐私设置决定；数据模型支持不代表默认收集。
+- 成功查询默认持久化；用户可关闭自动历史、配置保留期限或启用不写入内容的临时隐私模式。
 
 ### 11.2 阶段一 schema 方向
 
 ```text
 app_settings
-window_profiles
+window_profiles          # 仅 main / mini 两个稳定角色
 provider_configs
 provider_profile_members
+translation_mode_profiles
 dictionary_sources
-query_sessions          # 仅在用户启用历史时写入
-query_sources           # 仅在用户启用历史时写入
-provider_results        # 仅在用户启用历史时写入
+query_sessions
+query_sources
+translation_attempts
+provider_results
+favorite_references
 ```
 
 关键原则：
 
-- provider 配置与窗口 profile 多对多关联；
-- provider 结果保留规范化结构和 provider 特有扩展 JSON；
+- provider 配置与 main/mini window profile 多对多关联；
+- 每个 AI 重试创建新的 attempt 和版本化规范结果；不保存供应商原始敏感响应；
+- 收藏引用稳定的 session、attempt 和结果版本，自动历史清理不删除收藏；
+- 临时隐私模式不写入 query、attempt、result、favorite 或搜索正文；
 - schema 不提前创建知识卡和复习表；阶段二通过 migration 新增；
 - 所有 ID 使用应用生成的稳定标识，避免以显示名称作为外键；
 - 时间统一存 UTC，UI 按本地时区展示。
@@ -455,13 +463,11 @@ provider_results        # 仅在用户启用历史时写入
 
 按窗口建立 capability：
 
-- Mini：查询流、复制、发音和关闭；
-- Floating：查询流、复制、发音、重试和置顶；
-- Main：完整查询和普通设置读取；
-- Settings：provider 配置与密钥写入；
+- Mini：查询流、复制、发音、收藏、重试、置顶、关闭和转到主窗口；
+- Main：完整查询、历史、收藏、普通设置、provider 配置与密钥写入；
 - Capture：截图会话相关能力。
 
-默认拒绝未声明命令。任何涉及文件、Shell、HTTP、剪贴板和凭据的能力都必须显式授权到特定窗口。
+不存在 Floating 或独立 Settings capability。默认拒绝未声明命令；任何涉及文件、Shell、HTTP、剪贴板和凭据的能力都必须显式授权到 Main、Mini 或 Capture 中的最小适用角色。
 
 ### 12.3 内容安全
 
@@ -511,7 +517,7 @@ UI 不解析字符串判断错误类型。
 - Accessibility / AXUIElement：选区与位置；
 - Vision：OCR；
 - 系统语音：TTS；
-- Apple Dictionary / Apple Translate：平台专属 provider；
+- Apple Dictionary：平台专属 dictionary provider；Apple Translate 不接入；
 - AppKit 扩展：非激活悬浮窗、跨 Space、焦点；
 - Keychain：凭据。
 
@@ -566,7 +572,7 @@ UI 不解析字符串判断错误类型。
 - 记录本地阶段耗时、服务耗时、取消和错误分类，不默认记录原文。
 - UI 错误上报到 Rust 日志通道并附窗口角色。
 - 提供脱敏诊断包：版本、平台、WebView、能力报告、权限、provider 状态和错误码。
-- 性能指标覆盖窗口唤起、取词、OCR、首个结果和全部结果时间。
+- 性能指标覆盖窗口唤起、取词、OCR、提交状态响应和完整结果时间。
 
 ## 17. 测试架构
 
@@ -576,7 +582,8 @@ UI 不解析字符串判断错误类型。
 - `application`：使用 fake ports 的用例测试；
 - `providers`：固定响应契约测试、超时、限流和异常 payload；
 - `storage`：临时 SQLite、migration 前后兼容、事务测试；
-- `query`：并行、顺序、取消、过期结果和部分失败测试；
+- `query`：主服务单次请求、其他服务按需请求、无隐式回退、取消、attempt 版本和过期结果测试；
+- `history`：默认保存、关闭历史、保留策略、隐私模式和收藏引用测试；
 - `security`：脱敏、权限和输入验证测试。
 
 ### React
@@ -584,7 +591,7 @@ UI 不解析字符串判断错误类型。
 - Vitest + React Testing Library；
 - reducer 的事件序列测试；
 - 键盘交互、焦点、可访问名称和错误状态；
-- 三类窗口共享组件的角色差异测试；
+- 主窗口与迷你窗口共享组件的角色差异测试；
 - 生成 DTO 的编译检查。
 
 ### 平台
@@ -610,7 +617,7 @@ UI 不解析字符串判断错误类型。
 
 阶段二新增知识卡和复习模块时：
 
-- 订阅已完成的 `QuerySession` 和用户明确的保存动作；
+- 订阅已完成的 `QuerySession`、`TranslationAttempt` 和用户收藏的稳定结果版本；
 - 通过新 use case 创建 `KnowledgeCard`；
 - 增加独立 repository 与 migration；
 - AI 生成作为 provider/use case，不进入窗口或平台模块；
@@ -665,13 +672,15 @@ Evolish/
 ## 21. 架构验收条件
 
 - [ ] 查询用例可以在不启动 Tauri/WebView 的情况下通过 fake ports 测试。
-- [ ] 新增翻译 provider 不需要修改窗口组件和数据库 schema。
+- [ ] 新增 AI 协议 adapter 或 OpenAI-compatible profile 不需要修改窗口组件和数据库 schema。
 - [ ] 新增平台实现不需要修改查询编排规则。
 - [ ] React 无法直接读取 secret 或执行 SQL。
 - [ ] 每类窗口拥有独立最小 Tauri capability。
 - [ ] 查询 Channel 保持单会话事件顺序。
 - [ ] 新查询不会接收旧 session 的结果。
-- [ ] 单 provider 失败不影响其他 provider。
+- [ ] 主 provider 失败不自动请求其他 provider；其他 provider 只有在用户展开后才执行。
+- [ ] UI 在完整结果事件前不接收可渲染正文，重试保留旧成功结果版本。
+- [ ] 历史关闭、隐私模式和收藏引用遵守已接受的持久化边界。
 - [ ] 三端平台能力以报告形式可诊断。
 - [ ] 阶段二可通过新模块消费已完成查询，无需重写阶段一入口。
 
@@ -684,7 +693,7 @@ Evolish/
 3. macOS/Windows/Linux 跨应用取词的原生实现链路；
 4. MDict 索引与 HTML 内容安全呈现；
 5. provider 配置描述协议与结果规范化 schema；
-6. 查询历史默认策略和本地内容加密；
+6. 本地历史内容加密与导出策略；
 7. 安装包、签名、自动更新和发布渠道。
 
 ## 23. 技术依据

@@ -15,12 +15,88 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+async-trait = "0.1.89"
+keyring-core = "1.0.0"
+lingua = { version = "1.8.0", default-features = false, features = [
+  "arabic",
+  "bengali",
+  "bokmal",
+  "bulgarian",
+  "chinese",
+  "croatian",
+  "czech",
+  "danish",
+  "dutch",
+  "english",
+  "estonian",
+  "finnish",
+  "french",
+  "german",
+  "greek",
+  "hebrew",
+  "hindi",
+  "hungarian",
+  "indonesian",
+  "italian",
+  "japanese",
+  "korean",
+  "latvian",
+  "lithuanian",
+  "malay",
+  "mongolian",
+  "persian",
+  "polish",
+  "portuguese",
+  "romanian",
+  "russian",
+  "serbian",
+  "slovak",
+  "slovene",
+  "spanish",
+  "swedish",
+  "tagalog",
+  "tamil",
+  "telugu",
+  "thai",
+  "turkish",
+  "ukrainian",
+  "urdu",
+  "vietnamese",
+] }
+reqwest = { version = "0.13.4", default-features = false, features = ["json", "rustls", "stream"] }
+secrecy = "0.10.3"
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sqlx = { version = "0.9.0", default-features = false, features = [
+  "macros",
+  "migrate",
+  "runtime-tokio",
+  "sqlite-bundled",
+  "time",
+  "uuid",
+] }
 tauri = { version = "2", features = [] }
+time = { version = "0.3.55", features = ["formatting", "parsing", "serde"] }
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tokio-util = { version = "0.7.19", features = ["rt"] }
 ts-rs = { version = "12.0.1", features = ["serde-compat"] }
+unicode-segmentation = "1.13.3"
+url = { version = "2.5.8", features = ["serde"] }
+uuid = { version = "1.24.0", features = ["serde", "v7"] }
+zeroize = { version = "1.8.2", features = ["derive"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+apple-native-keyring-store = { version = "1.0.2", features = ["keychain"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-native-keyring-store = { version = "1.1.0", default-features = false }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus-secret-service-keyring-store = { version = "1.0.0", features = ["rt-tokio-crypto-rust"] }
 
 [dev-dependencies]
-serde_json = "1"
+tempfile = "3.27.0"
+wiremock = "0.6.5"
 
 [lints.rust]
 unsafe_code = "forbid"
