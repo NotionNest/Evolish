@@ -146,14 +146,14 @@ Resolve exact compatible versions from current official documentation during imp
 - Test: upgrade from the Task 5 `0001` schema without editing its checksum
 - Test: corresponding modules
 
-- [ ] Write failing profile tests for multiple instances, required primary, disabled profile, URL userinfo/fragment, remote HTTP rejection, loopback HTTP acceptance, timeout and parameters.
-- [ ] Write failing workspace-profile repository tests for atomic read/update, unique enabled primary, deterministic provider order, target-language pair, default mode, optimistic conflict and invalid referenced/disabled objects.
-- [ ] Write a failing fresh-install flow: empty database opens, workspace read returns unconfigured state, translation submission returns `primary_missing` without HTTP, and creating the first provider plus selecting it as primary commits atomically.
-- [ ] Write a failing cross-origin redirect test proving Authorization is never forwarded.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_profile --locked`; confirm RED.
-- [ ] Implement descriptors, provider/workspace repositories, registry resolution and HTTP policy using the already-created `0001` tables; do not edit `0001`. Return one immutable `WorkspaceProfileSnapshot` for session creation.
-- [ ] Verify secrets never enter profile rows/DTOs and migrated endpoints are revalidated at request time.
-- [ ] Commit: `feat(providers): add secure provider profiles and registry`.
+- [x] Write failing profile tests for multiple instances, required primary, disabled profile, URL userinfo/fragment, remote HTTP rejection, loopback HTTP acceptance, timeout and parameters.
+- [x] Write failing workspace-profile repository tests for atomic read/update, unique enabled primary, deterministic provider order, target-language pair, default mode, optimistic conflict and invalid referenced/disabled objects.
+- [x] Write a failing fresh-install flow: empty database opens, workspace read returns unconfigured state, translation submission returns `primary_missing` without HTTP, and creating the first provider plus selecting it as primary commits atomically.
+- [x] Write a failing cross-origin redirect test proving Authorization is never forwarded.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_profile --locked`; confirm RED.
+- [x] Implement descriptors, provider/workspace repositories, registry resolution and HTTP policy using the already-created `0001` tables; do not edit `0001`. Return one immutable `WorkspaceProfileSnapshot` for session creation.
+- [x] Verify secrets never enter profile rows/DTOs and migrated endpoints are revalidated at request time.
+- [x] Commit: `feat(providers): add secure provider profiles and registry`.
 
 ### Task 8: Establish the shared AI provider contract
 
