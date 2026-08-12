@@ -5,5 +5,7 @@
 
 pub mod error;
 pub mod language;
+pub mod provider;
 pub mod query_intent;
 pub mod translation;
+pub mod translation_mode;

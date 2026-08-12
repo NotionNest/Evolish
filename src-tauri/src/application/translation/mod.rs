@@ -6,4 +6,6 @@
 pub mod classifier;
 pub mod language_direction;
 pub mod ports;
+pub mod prompt_compiler;
+pub mod provider_selection;
 pub mod result_validator;

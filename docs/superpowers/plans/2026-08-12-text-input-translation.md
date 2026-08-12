@@ -110,13 +110,13 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/migrations/0001_translation_core.sql` containing the complete immutable core schema for translation modes, provider profiles and the closed `main`/`mini` workspace-role model
 - Test: mode/compiler/repository modules
 
-- [ ] Write failing seed tests for stable standard/literal/natural/academic/concise IDs, immutable built-ins, custom-copy behavior and version increments.
-- [ ] Write failing prompt boundary tests proving user instructions cannot replace schema, language or system contract and user正文 is treated as data.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml translation_mode --locked`; confirm RED.
-- [ ] Add failing schema/state tests proving `window_role` accepts only `main`/`mini` and rejects removed or unknown roles. Seed one `main` workspace profile for this feature: fresh install permits null primary/empty enabled list and returns a configurable unconfigured state; configured state requires a unique valid primary in the ordered enabled list, different primary/secondary languages, valid default mode and optimistic-lock version. The Mini epic later inserts the `mini` profile without changing this role contract.
-- [ ] Implement the complete `0001` core schema (mode, provider-profile and workspace-profile tables), then mode snapshots, layered `PromptCompiler`, template validation and repository ordering/deletion conflict. Later tasks must not rewrite this applied migration.
-- [ ] Run temporary-SQLite migration/repository tests and Clippy.
-- [ ] Commit: `feat(translation): add versioned translation modes`.
+- [x] Write failing seed tests for stable standard/literal/natural/academic/concise IDs, immutable built-ins, custom-copy behavior and version increments.
+- [x] Write failing prompt boundary tests proving user instructions cannot replace schema, language or system contract and user正文 is treated as data.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml translation_mode --locked`; confirm RED.
+- [x] Add failing schema/state tests proving `window_role` accepts only `main`/`mini` and rejects removed or unknown roles. Seed one `main` workspace profile for this feature: fresh install permits null primary/empty enabled list and returns a configurable unconfigured state; configured state requires a unique valid primary in the ordered enabled list, different primary/secondary languages, valid default mode and optimistic-lock version. The Mini epic later inserts the `mini` profile without changing this role contract.
+- [x] Implement the complete `0001` core schema (mode, provider-profile and workspace-profile tables), then mode snapshots, layered `PromptCompiler`, template validation and repository ordering/deletion conflict. Later tasks must not rewrite this applied migration.
+- [x] Run temporary-SQLite migration/repository tests and Clippy.
+- [x] Commit: `feat(translation): add versioned translation modes`.
 
 ### Task 6: Establish SQLite and credential boundaries
 
@@ -128,12 +128,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/migrations/0002_translation_history.sql`
 - Test: storage and credential modules
 
-- [ ] Write failing tests for fresh/upgrade migrations, foreign keys, WAL and migration idempotence.
-- [ ] Write a failing secret-canary test scanning SQLite, DTO JSON, Debug and captured logs.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml storage --locked`; confirm RED.
-- [ ] Implement database bootstrap before window readiness and `CredentialPort` with redacted secret types; never fall back to plaintext storage.
-- [ ] Test unavailable credential store, migration failure, secret update/delete and canary absence.
-- [ ] Commit: `feat(storage): add translation database and credential boundary`.
+- [x] Write failing tests for fresh/upgrade migrations, foreign keys, WAL and migration idempotence.
+- [x] Write a failing secret-canary test scanning SQLite, DTO JSON, Debug and captured logs.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml storage --locked`; confirm RED.
+- [x] Implement database bootstrap before window readiness and `CredentialPort` with redacted secret types; never fall back to plaintext storage.
+- [x] Test unavailable credential store, migration failure, secret update/delete and canary absence.
+- [x] Commit: `feat(storage): add translation database and credential boundary`.
 
 ### Task 7: Implement provider profiles, registry and secure HTTP policy
 
@@ -146,14 +146,14 @@ Resolve exact compatible versions from current official documentation during imp
 - Test: upgrade from the Task 5 `0001` schema without editing its checksum
 - Test: corresponding modules
 
-- [ ] Write failing profile tests for multiple instances, required primary, disabled profile, URL userinfo/fragment, remote HTTP rejection, loopback HTTP acceptance, timeout and parameters.
-- [ ] Write failing workspace-profile repository tests for atomic read/update, unique enabled primary, deterministic provider order, target-language pair, default mode, optimistic conflict and invalid referenced/disabled objects.
-- [ ] Write a failing fresh-install flow: empty database opens, workspace read returns unconfigured state, translation submission returns `primary_missing` without HTTP, and creating the first provider plus selecting it as primary commits atomically.
-- [ ] Write a failing cross-origin redirect test proving Authorization is never forwarded.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_profile --locked`; confirm RED.
-- [ ] Implement descriptors, provider/workspace repositories, registry resolution and HTTP policy using the already-created `0001` tables; do not edit `0001`. Return one immutable `WorkspaceProfileSnapshot` for session creation.
-- [ ] Verify secrets never enter profile rows/DTOs and migrated endpoints are revalidated at request time.
-- [ ] Commit: `feat(providers): add secure provider profiles and registry`.
+- [x] Write failing profile tests for multiple instances, required primary, disabled profile, URL userinfo/fragment, remote HTTP rejection, loopback HTTP acceptance, timeout and parameters.
+- [x] Write failing workspace-profile repository tests for atomic read/update, unique enabled primary, deterministic provider order, target-language pair, default mode, optimistic conflict and invalid referenced/disabled objects.
+- [x] Write a failing fresh-install flow: empty database opens, workspace read returns unconfigured state, translation submission returns `primary_missing` without HTTP, and creating the first provider plus selecting it as primary commits atomically.
+- [x] Write a failing cross-origin redirect test proving Authorization is never forwarded.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_profile --locked`; confirm RED.
+- [x] Implement descriptors, provider/workspace repositories, registry resolution and HTTP policy using the already-created `0001` tables; do not edit `0001`. Return one immutable `WorkspaceProfileSnapshot` for session creation.
+- [x] Verify secrets never enter profile rows/DTOs and migrated endpoints are revalidated at request time.
+- [x] Commit: `feat(providers): add secure provider profiles and registry`.
 
 ### Task 8: Establish the shared AI provider contract
 
