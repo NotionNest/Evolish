@@ -212,12 +212,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/application/translation/chunker.rs`
 - Test: same module
 
-- [ ] Write failing boundary tests for paragraphs, oversized sentences, emoji/graphemes, code blocks, lists, index continuity and exact source reconstruction.
-- [ ] Write failing orchestration tests proving max concurrency two, source-order output after out-of-order completion, all-or-nothing failure and child cancellation.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml chunk --locked`; confirm RED.
-- [ ] Implement deterministic chunk plan, bounded executor and merge validator; only final complete result is persisted/published.
-- [ ] Run property tests and Clippy.
-- [ ] Commit: `feat(translation): add ordered long-text processing`.
+- [x] Write failing boundary tests for paragraphs, oversized sentences, emoji/graphemes, code blocks, lists, index continuity and exact source reconstruction.
+- [x] Write failing orchestration tests proving max concurrency two, source-order output after out-of-order completion, all-or-nothing failure and child cancellation.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml chunk --locked`; confirm RED.
+- [x] Implement deterministic chunk plan, bounded executor and merge validator; only final complete result is persisted/published.
+- [x] Run property tests and Clippy.
+- [x] Commit: `feat(translation): add ordered long-text processing`.
 
 ### Task 10: Implement `QuerySupervisor` and `TranslationService`
 
