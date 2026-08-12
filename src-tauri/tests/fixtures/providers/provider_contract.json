@@ -1,0 +1,19 @@
+{
+  "validSentence": {
+    "schemaVersion": 1,
+    "primaryTranslation": "你好"
+  },
+  "errorKinds": [
+    "authentication_failed",
+    "rate_limited",
+    "quota_exceeded",
+    "model_unavailable",
+    "safety_refusal",
+    "response_empty",
+    "response_malformed",
+    "response_schema_invalid",
+    "response_too_large",
+    "timed_out",
+    "cancelled"
+  ]
+}

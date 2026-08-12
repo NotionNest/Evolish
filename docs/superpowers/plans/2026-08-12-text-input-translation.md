@@ -164,11 +164,11 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/tests/fixtures/providers/*.json`
 - Test: shared adapter contract harness
 
-- [ ] Define a failing shared contract for valid adaptive results, auth, rate limit, quota, unavailable model, safety refusal, empty/malformed/schema-invalid/oversized responses, timeout and cancellation.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_contract --locked`; confirm RED because no adapter implements the harness.
-- [ ] Implement reusable fake request/response builders, error expectations and secret-canary assertions without adding any provider adapter.
-- [ ] Run the harness unit tests; expect the harness itself GREEN and adapter conformance still pending.
-- [ ] Commit: `test(providers): define AI provider contract`.
+- [x] Define a failing shared contract for valid adaptive results, auth, rate limit, quota, unavailable model, safety refusal, empty/malformed/schema-invalid/oversized responses, timeout and cancellation.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_contract --locked`; confirm RED because no adapter implements the harness.
+- [x] Implement reusable fake request/response builders, error expectations and secret-canary assertions without adding any provider adapter.
+- [x] Run the harness unit tests; expect the harness itself GREEN and adapter conformance still pending.
+- [x] Commit: `test(providers): define AI provider contract`.
 
 ### Task 8.1: Implement OpenAI and OpenAI-compatible adapters
 
