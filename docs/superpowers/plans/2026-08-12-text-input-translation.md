@@ -188,10 +188,10 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/infrastructure/ai/anthropic.rs`
 - Test: adapter through the Task 8 contract
 
-- [ ] Register the unimplemented Anthropic adapter and run its shared contract; confirm RED.
-- [ ] Implement native Messages/structured-output request, complete-response parsing and native error/safety mapping.
-- [ ] Run the Anthropic contract, cancellation, malformed response and secret-canary tests; expect GREEN.
-- [ ] Commit: `feat(providers): add Anthropic translation adapter`.
+- [x] Register the unimplemented Anthropic adapter and run its shared contract; confirm RED.
+- [x] Implement native Messages/structured-output request, complete-response parsing and native error/safety mapping.
+- [x] Run the Anthropic contract, cancellation, malformed response and secret-canary tests; expect GREEN.
+- [x] Commit: `feat(providers): add Anthropic translation adapter`.
 
 ### Task 8.3: Implement the Gemini native adapter
 

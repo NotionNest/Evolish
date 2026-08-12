@@ -1,3 +1,4 @@
+pub mod anthropic;
 pub mod contract_fixtures;
 pub mod http_client;
 pub mod openai;
