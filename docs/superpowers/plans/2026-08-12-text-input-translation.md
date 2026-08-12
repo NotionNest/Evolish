@@ -199,10 +199,10 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/infrastructure/ai/gemini.rs`
 - Test: adapter through the Task 8 contract
 
-- [ ] Register the unimplemented Gemini adapter and run its shared contract; confirm RED.
-- [ ] Implement native content-generation/response-schema request, complete-response parsing and native error/safety mapping.
-- [ ] Run the Gemini contract, cancellation, malformed response and secret-canary tests; expect GREEN.
-- [ ] Commit: `feat(providers): add Gemini translation adapter`.
+- [x] Register the unimplemented Gemini adapter and run its shared contract; confirm RED.
+- [x] Implement native content-generation/response-schema request, complete-response parsing and native error/safety mapping.
+- [x] Run the Gemini contract, cancellation, malformed response and secret-canary tests; expect GREEN.
+- [x] Commit: `feat(providers): add Gemini translation adapter`.
 
 ### Task 9: Implement deterministic long-text processing
 
