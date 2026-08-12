@@ -44,11 +44,11 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/domain/mod.rs`, `src-tauri/src/application/translation/mod.rs`, `src-tauri/src/infrastructure/mod.rs`
 - Test: `src-tauri/src/lib.rs`
 
-- [ ] Write a failing architecture test proving `domain` is independent of Tauri, SQLx and Reqwest, while application ports remain importable without a runtime.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml architecture_boundary --locked`; expect failure because modules/dependencies do not exist.
-- [ ] Use Context7 to verify current feature flags and APIs, then add the production/test dependencies and focused module roots without relaxing `unsafe_code` or Clippy policy.
-- [ ] Run the focused test, full Clippy and `cargo deny`; expect all to pass with no unreviewed license/source exception.
-- [ ] Commit: `build: add translation core dependencies`.
+- [x] Write a failing architecture test proving `domain` is independent of Tauri, SQLx and Reqwest, while application ports remain importable without a runtime.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml architecture_boundary --locked`; expect failure because modules/dependencies do not exist.
+- [x] Use Context7 to verify current feature flags and APIs, then add the production/test dependencies and focused module roots without relaxing `unsafe_code` or Clippy policy.
+- [x] Run the focused test, full Clippy and `cargo deny`; expect all to pass with no unreviewed license/source exception.
+- [x] Commit: `build: add translation core dependencies`.
 
 ### Task 2: Define identifiers, language catalog and query intent
 
@@ -59,12 +59,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Modify: `src-tauri/src/domain/mod.rs`
 - Test: adjacent Rust test modules
 
-- [ ] Write failing tests for UUID v7 generation/parse, unique BCP 47 tags for all 48 languages, writing direction, provider-code mapping failure and stable serialization.
-- [ ] Write failing intent fixtures for Chinese/English words, phrases, sentences, paragraphs, mixed Unicode, code and manual override.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml domain:: --locked`; expect missing types/rules.
-- [ ] Implement closed enums and validated value objects: session/attempt/profile/mode IDs, result version, language selection/direction and query intent.
-- [ ] Rerun domain tests and Clippy; expect deterministic fixtures and explicit invalid-value errors.
-- [ ] Commit: `feat(domain): define translation language and intent models`.
+- [x] Write failing tests for UUID v7 generation/parse, unique BCP 47 tags for all 48 languages, writing direction, provider-code mapping failure and stable serialization.
+- [x] Write failing intent fixtures for Chinese/English words, phrases, sentences, paragraphs, mixed Unicode, code and manual override.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml domain:: --locked`; expect missing types/rules.
+- [x] Implement closed enums and validated value objects: session/attempt/profile/mode IDs, result version, language selection/direction and query intent.
+- [x] Rerun domain tests and Clippy; expect deterministic fixtures and explicit invalid-value errors.
+- [x] Commit: `feat(domain): define translation language and intent models`.
 
 ### Task 3: Define adaptive results and attempt state machine
 
@@ -75,12 +75,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/domain/error.rs`, `src-tauri/src/application/translation/result_validator.rs`
 - Test: adjacent Rust test modules
 
-- [ ] Write failing schema tests for valid Word/Phrase/Sentence/LongText V1 payloads and invalid empty translation, missing/duplicate paragraph indexes, intent mismatch and unknown values.
-- [ ] Write failing transition tests for `NotRequested → Queued → Running → Succeeded/Failed/Cancelled`; retry must create a new attempt ID/version.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml translation --locked`; confirm RED.
-- [ ] Implement tagged Serde enums, semantic validation and typed errors; provider data must never panic the core.
-- [ ] Verify camelCase serialization snapshots and Clippy.
-- [ ] Commit: `feat(domain): add versioned adaptive translation results`.
+- [x] Write failing schema tests for valid Word/Phrase/Sentence/LongText V1 payloads and invalid empty translation, missing/duplicate paragraph indexes, intent mismatch and unknown values.
+- [x] Write failing transition tests for `NotRequested → Queued → Running → Succeeded/Failed/Cancelled`; retry must create a new attempt ID/version.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml translation --locked`; confirm RED.
+- [x] Implement tagged Serde enums, semantic validation and typed errors; provider data must never panic the core.
+- [x] Verify camelCase serialization snapshots and Clippy.
+- [x] Commit: `feat(domain): add versioned adaptive translation results`.
 
 ### Task 4: Implement local language detection, direction and classification
 
@@ -92,13 +92,13 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/tests/fixtures/language_detection.json`
 - Test: corresponding modules
 
-- [ ] Write failing direction table tests for primary/secondary targets, manual overrides, same-language rejection and uncertainty.
-- [ ] Write failing 48-language fixture tests with explicit mixed/short uncertain cases and ≥95% expected direction requirement.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml language --locked`; confirm RED.
-- [ ] Implement `LanguageDetectorPort`, one-time Lingua initialization, high-confidence script rules and confidence/reason output; no network detector exists.
-- [ ] Implement direction resolver and deterministic intent classifier; explicit overrides always win.
-- [ ] Run corpus twice to prove determinism and confirm a fake network port receives zero calls.
-- [ ] Commit: `feat(translation): add local language and intent analysis`.
+- [x] Write failing direction table tests for primary/secondary targets, manual overrides, same-language rejection and uncertainty.
+- [x] Write failing 48-language fixture tests with explicit mixed/short uncertain cases and ≥95% expected direction requirement.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml language --locked`; confirm RED.
+- [x] Implement `LanguageDetectorPort`, one-time Lingua initialization, high-confidence script rules and confidence/reason output; no network detector exists.
+- [x] Implement direction resolver and deterministic intent classifier; explicit overrides always win.
+- [x] Run corpus twice to prove determinism and confirm a fake network port receives zero calls.
+- [x] Commit: `feat(translation): add local language and intent analysis`.
 
 ### Task 5: Implement modes and prompt compilation
 

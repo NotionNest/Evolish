@@ -1,0 +1,9 @@
+//! Runtime-agnostic translation use cases and ports.
+//!
+//! Concrete desktop, persistence, and provider adapters are assembled by the
+//! infrastructure and runtime layers.
+
+pub mod classifier;
+pub mod language_direction;
+pub mod ports;
+pub mod result_validator;
