@@ -128,12 +128,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/migrations/0002_translation_history.sql`
 - Test: storage and credential modules
 
-- [ ] Write failing tests for fresh/upgrade migrations, foreign keys, WAL and migration idempotence.
-- [ ] Write a failing secret-canary test scanning SQLite, DTO JSON, Debug and captured logs.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml storage --locked`; confirm RED.
-- [ ] Implement database bootstrap before window readiness and `CredentialPort` with redacted secret types; never fall back to plaintext storage.
-- [ ] Test unavailable credential store, migration failure, secret update/delete and canary absence.
-- [ ] Commit: `feat(storage): add translation database and credential boundary`.
+- [x] Write failing tests for fresh/upgrade migrations, foreign keys, WAL and migration idempotence.
+- [x] Write a failing secret-canary test scanning SQLite, DTO JSON, Debug and captured logs.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml storage --locked`; confirm RED.
+- [x] Implement database bootstrap before window readiness and `CredentialPort` with redacted secret types; never fall back to plaintext storage.
+- [x] Test unavailable credential store, migration failure, secret update/delete and canary absence.
+- [x] Commit: `feat(storage): add translation database and credential boundary`.
 
 ### Task 7: Implement provider profiles, registry and secure HTTP policy
 

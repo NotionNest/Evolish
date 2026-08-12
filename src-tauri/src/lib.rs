@@ -11,6 +11,18 @@ pub mod ipc;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(|app| {
+            use tauri::Manager;
+
+            let data_directory = app.path().app_data_dir()?;
+            std::fs::create_dir_all(&data_directory)?;
+            let database_path = data_directory.join("evolish.sqlite3");
+            let database = tauri::async_runtime::block_on(
+                infrastructure::storage::database::Database::open(&database_path),
+            )?;
+            app.manage(database);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![ipc::bootstrap::app_get_bootstrap])
         .run(tauri::generate_context!())
         .expect("failed to run Evolish desktop application");
