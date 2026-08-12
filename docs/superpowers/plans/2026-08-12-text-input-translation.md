@@ -44,11 +44,11 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/domain/mod.rs`, `src-tauri/src/application/translation/mod.rs`, `src-tauri/src/infrastructure/mod.rs`
 - Test: `src-tauri/src/lib.rs`
 
-- [ ] Write a failing architecture test proving `domain` is independent of Tauri, SQLx and Reqwest, while application ports remain importable without a runtime.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml architecture_boundary --locked`; expect failure because modules/dependencies do not exist.
-- [ ] Use Context7 to verify current feature flags and APIs, then add the production/test dependencies and focused module roots without relaxing `unsafe_code` or Clippy policy.
-- [ ] Run the focused test, full Clippy and `cargo deny`; expect all to pass with no unreviewed license/source exception.
-- [ ] Commit: `build: add translation core dependencies`.
+- [x] Write a failing architecture test proving `domain` is independent of Tauri, SQLx and Reqwest, while application ports remain importable without a runtime.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml architecture_boundary --locked`; expect failure because modules/dependencies do not exist.
+- [x] Use Context7 to verify current feature flags and APIs, then add the production/test dependencies and focused module roots without relaxing `unsafe_code` or Clippy policy.
+- [x] Run the focused test, full Clippy and `cargo deny`; expect all to pass with no unreviewed license/source exception.
+- [x] Commit: `build: add translation core dependencies`.
 
 ### Task 2: Define identifiers, language catalog and query intent
 
