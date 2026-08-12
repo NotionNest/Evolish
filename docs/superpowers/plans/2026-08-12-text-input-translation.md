@@ -92,13 +92,13 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/tests/fixtures/language_detection.json`
 - Test: corresponding modules
 
-- [ ] Write failing direction table tests for primary/secondary targets, manual overrides, same-language rejection and uncertainty.
-- [ ] Write failing 48-language fixture tests with explicit mixed/short uncertain cases and ≥95% expected direction requirement.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml language --locked`; confirm RED.
-- [ ] Implement `LanguageDetectorPort`, one-time Lingua initialization, high-confidence script rules and confidence/reason output; no network detector exists.
-- [ ] Implement direction resolver and deterministic intent classifier; explicit overrides always win.
-- [ ] Run corpus twice to prove determinism and confirm a fake network port receives zero calls.
-- [ ] Commit: `feat(translation): add local language and intent analysis`.
+- [x] Write failing direction table tests for primary/secondary targets, manual overrides, same-language rejection and uncertainty.
+- [x] Write failing 48-language fixture tests with explicit mixed/short uncertain cases and ≥95% expected direction requirement.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml language --locked`; confirm RED.
+- [x] Implement `LanguageDetectorPort`, one-time Lingua initialization, high-confidence script rules and confidence/reason output; no network detector exists.
+- [x] Implement direction resolver and deterministic intent classifier; explicit overrides always win.
+- [x] Run corpus twice to prove determinism and confirm a fake network port receives zero calls.
+- [x] Commit: `feat(translation): add local language and intent analysis`.
 
 ### Task 5: Implement modes and prompt compilation
 

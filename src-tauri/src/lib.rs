@@ -1,6 +1,6 @@
 pub mod application;
 pub mod domain;
-pub(crate) mod infrastructure;
+pub mod infrastructure;
 pub mod ipc;
 
 /// Starts the Evolish desktop runtime and blocks until the application exits.
