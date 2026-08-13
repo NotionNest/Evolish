@@ -35,6 +35,55 @@ struct SessionState {
     attempts: HashMap<String, Vec<AttemptRecord>>,
 }
 
+/// Stable lifecycle event emitted only from the application supervision boundary.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TranslationEvent {
+    kind: TranslationEventKind,
+    session_id: TranslationSessionId,
+    attempt_id: TranslationAttemptId,
+}
+
+impl TranslationEvent {
+    #[must_use]
+    pub const fn kind(self) -> TranslationEventKind {
+        self.kind
+    }
+    #[must_use]
+    pub const fn session_id(self) -> TranslationSessionId {
+        self.session_id
+    }
+    #[must_use]
+    pub const fn attempt_id(self) -> TranslationAttemptId {
+        self.attempt_id
+    }
+}
+
+/// Safe event categories for UI sequencing and later typed IPC projection.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TranslationEventKind {
+    SessionStarted,
+    AttemptQueued,
+    AttemptRunning,
+    AttemptSucceeded,
+    AttemptFailed,
+    AttemptCancelled,
+}
+
+/// Publishes stable application events without exposing provider transport data.
+pub trait TranslationEventSink: Send + Sync {
+    fn publish(&self, event: TranslationEvent);
+}
+
+/// Receives a fully validated successful attempt after it has passed session and stale-result guards.
+pub trait SuccessfulTranslationHook: Send + Sync {
+    fn persist_success(&self, session_id: TranslationSessionId, attempt: AttemptSnapshot);
+}
+
+struct NoopEventSink;
+impl TranslationEventSink for NoopEventSink {
+    fn publish(&self, _: TranslationEvent) {}
+}
+
 fn completed_submission_from_state(
     state: &SupervisorState,
     submission_id: &str,
@@ -120,42 +169,98 @@ impl QuerySupervisor {
         &self,
         window_label: &str,
         primary: Arc<dyn AiTranslationProvider>,
-        _unexpanded_providers: Vec<Arc<dyn AiTranslationProvider>>,
+        unexpanded_providers: Vec<Arc<dyn AiTranslationProvider>>,
         request: ProviderTranslationRequest,
     ) -> Result<(TranslationSessionId, AdaptiveTranslationResult), ProviderError> {
-        let cancellation = CancellationToken::new();
-        let session_id = TranslationSessionId::generate();
-        {
-            let mut state = self.state.lock().expect("supervisor state lock");
-            if let Some(previous_id) = state.windows.insert(window_label.to_owned(), session_id)
-                && let Some(previous) = state.sessions.get(&previous_id)
-            {
-                previous.cancellation.cancel();
-            }
-            state.sessions.insert(
-                session_id,
-                SessionState {
-                    cancellation: cancellation.clone(),
-                    completed_results: HashMap::new(),
-                    attempts: HashMap::from([(
-                        "__primary".to_owned(),
-                        vec![AttemptRecord {
-                            snapshot: AttemptSnapshot {
-                                id: TranslationAttemptId::generate(),
-                                result_version: ResultVersion::initial(),
-                                result: None,
-                                status: AttemptStatus::Queued,
-                                configuration: None,
-                            },
-                        }],
-                    )]),
-                },
-            );
-        }
+        self.submit_primary_with_sink(
+            window_label,
+            primary,
+            unexpanded_providers,
+            request,
+            &NoopEventSink,
+        )
+        .await
+    }
+
+    /// Submits the primary provider and publishes a stable lifecycle sequence.
+    ///
+    /// # Errors
+    ///
+    /// Returns the primary provider's classified error or cancellation result.
+    ///
+    /// # Panics
+    ///
+    /// Panics only if the supervisor's internal state mutex is poisoned.
+    pub async fn submit_primary_observed(
+        &self,
+        window_label: &str,
+        primary: Arc<dyn AiTranslationProvider>,
+        request: ProviderTranslationRequest,
+        sink: &dyn TranslationEventSink,
+    ) -> Result<(TranslationSessionId, AdaptiveTranslationResult), ProviderError> {
+        self.submit_primary_with_sink(window_label, primary, Vec::new(), request, sink)
+            .await
+    }
+
+    /// Submits the primary provider and invokes persistence only after a complete successful attempt is committed in memory.
+    ///
+    /// # Errors
+    ///
+    /// Returns the primary provider's classified error or cancellation result without invoking the success hook.
+    ///
+    /// # Panics
+    ///
+    /// Panics only if the supervisor's internal state mutex is poisoned.
+    pub async fn submit_primary_with_hook(
+        &self,
+        window_label: &str,
+        primary: Arc<dyn AiTranslationProvider>,
+        request: ProviderTranslationRequest,
+        hook: &dyn SuccessfulTranslationHook,
+    ) -> Result<(TranslationSessionId, AdaptiveTranslationResult), ProviderError> {
+        let result = self
+            .submit_primary_observed(window_label, primary, request, &NoopEventSink)
+            .await?;
+        let attempt = self
+            .latest_attempt(result.0, "__primary")
+            .expect("successful primary attempt");
+        hook.persist_success(result.0, attempt);
+        Ok(result)
+    }
+
+    async fn submit_primary_with_sink(
+        &self,
+        window_label: &str,
+        primary: Arc<dyn AiTranslationProvider>,
+        _unexpanded_providers: Vec<Arc<dyn AiTranslationProvider>>,
+        request: ProviderTranslationRequest,
+        sink: &dyn TranslationEventSink,
+    ) -> Result<(TranslationSessionId, AdaptiveTranslationResult), ProviderError> {
+        let (session_id, attempt_id, cancellation) = self.start_primary_session(window_label);
+        sink.publish(TranslationEvent {
+            kind: TranslationEventKind::SessionStarted,
+            session_id,
+            attempt_id,
+        });
+        sink.publish(TranslationEvent {
+            kind: TranslationEventKind::AttemptQueued,
+            session_id,
+            attempt_id,
+        });
         self.set_latest_attempt_status(session_id, "__primary", AttemptStatus::Running);
+        sink.publish(TranslationEvent {
+            kind: TranslationEventKind::AttemptRunning,
+            session_id,
+            attempt_id,
+        });
         let result = primary.translate(request, cancellation.clone()).await;
         if cancellation.is_cancelled() {
             self.set_latest_attempt_status(session_id, "__primary", AttemptStatus::Cancelled);
+            sink.publish(TranslationEvent {
+                kind: TranslationEventKind::AttemptCancelled,
+                session_id,
+                attempt_id,
+            });
             return Err(ProviderError::new(
                 crate::infrastructure::ai::contract_fixtures::ProviderErrorKind::Cancelled,
             ));
@@ -164,6 +269,11 @@ impl QuerySupervisor {
             Ok(translation) => translation,
             Err(error) => {
                 self.set_latest_attempt_status(session_id, "__primary", AttemptStatus::Failed);
+                sink.publish(TranslationEvent {
+                    kind: TranslationEventKind::AttemptFailed,
+                    session_id,
+                    attempt_id,
+                });
                 return Err(error);
             }
         };
@@ -191,7 +301,51 @@ impl QuerySupervisor {
             .expect("primary latest attempt");
         attempt.snapshot.result = Some(translation.clone());
         attempt.snapshot.status = AttemptStatus::Succeeded;
+        sink.publish(TranslationEvent {
+            kind: TranslationEventKind::AttemptSucceeded,
+            session_id,
+            attempt_id,
+        });
         Ok((session_id, translation))
+    }
+
+    fn start_primary_session(
+        &self,
+        window_label: &str,
+    ) -> (
+        TranslationSessionId,
+        TranslationAttemptId,
+        CancellationToken,
+    ) {
+        let cancellation = CancellationToken::new();
+        let session_id = TranslationSessionId::generate();
+        let attempt_id = TranslationAttemptId::generate();
+        let mut state = self.state.lock().expect("supervisor state lock");
+        if let Some(previous_id) = state.windows.insert(window_label.to_owned(), session_id)
+            && let Some(previous) = state.sessions.get(&previous_id)
+        {
+            previous.cancellation.cancel();
+        }
+        state.sessions.insert(
+            session_id,
+            SessionState {
+                cancellation: cancellation.clone(),
+                completed_results: HashMap::new(),
+                attempts: HashMap::from([(
+                    "__primary".to_owned(),
+                    vec![AttemptRecord {
+                        snapshot: AttemptSnapshot {
+                            id: attempt_id,
+                            result_version: ResultVersion::initial(),
+                            result: None,
+                            status: AttemptStatus::Queued,
+                            configuration: None,
+                        },
+                    }],
+                )]),
+            },
+        );
+        (session_id, attempt_id, cancellation)
     }
 
     /// Returns the active session identity for a window, including a failed session retained for retry.
@@ -835,6 +989,75 @@ mod tests {
                 .status(),
             crate::domain::translation::AttemptStatus::Failed
         );
+    }
+
+    #[tokio::test]
+    async fn primary_success_publishes_a_stable_ordered_event_sequence() {
+        let supervisor = super::QuerySupervisor::new();
+        let provider: Arc<dyn AiTranslationProvider> =
+            Arc::new(SuccessCountingProvider(AtomicUsize::new(0)));
+        let events = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = RecordingSink(Arc::clone(&events));
+
+        supervisor
+            .submit_primary_observed("main", provider, provider_request(), &sink)
+            .await
+            .expect("success");
+
+        let statuses: Vec<_> = events
+            .lock()
+            .expect("events")
+            .iter()
+            .map(|event| event.kind())
+            .collect();
+        assert_eq!(
+            statuses,
+            vec![
+                super::TranslationEventKind::SessionStarted,
+                super::TranslationEventKind::AttemptQueued,
+                super::TranslationEventKind::AttemptRunning,
+                super::TranslationEventKind::AttemptSucceeded,
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn success_hook_runs_once_only_after_the_attempt_has_succeeded() {
+        let supervisor = super::QuerySupervisor::new();
+        let provider: Arc<dyn AiTranslationProvider> =
+            Arc::new(SuccessCountingProvider(AtomicUsize::new(0)));
+        let hook = RecordingSuccessHook(Arc::new(std::sync::Mutex::new(Vec::new())));
+
+        supervisor
+            .submit_primary_with_hook("main", provider, provider_request(), &hook)
+            .await
+            .expect("success");
+
+        let attempts = hook.0.lock().expect("hooks");
+        assert_eq!(attempts.len(), 1);
+        assert_eq!(
+            attempts[0].status(),
+            crate::domain::translation::AttemptStatus::Succeeded
+        );
+        assert!(attempts[0].result().is_some());
+    }
+
+    struct RecordingSink(Arc<std::sync::Mutex<Vec<super::TranslationEvent>>>);
+    impl super::TranslationEventSink for RecordingSink {
+        fn publish(&self, event: super::TranslationEvent) {
+            self.0.lock().expect("events").push(event);
+        }
+    }
+
+    struct RecordingSuccessHook(Arc<std::sync::Mutex<Vec<super::AttemptSnapshot>>>);
+    impl super::SuccessfulTranslationHook for RecordingSuccessHook {
+        fn persist_success(
+            &self,
+            _: crate::domain::translation::TranslationSessionId,
+            attempt: super::AttemptSnapshot,
+        ) {
+            self.0.lock().expect("hooks").push(attempt);
+        }
     }
 
     #[tokio::test]
