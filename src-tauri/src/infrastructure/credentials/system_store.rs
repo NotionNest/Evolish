@@ -7,16 +7,29 @@ mod tests {
     struct RecordingCredentialStore {
         write_count: Mutex<usize>,
         deleted: Mutex<bool>,
+        secret: Mutex<Option<CredentialSecret>>,
     }
 
     impl CredentialPort for RecordingCredentialStore {
         fn set(
             &self,
             _metadata: &CredentialMetadata,
-            _secret: CredentialSecret,
+            secret: CredentialSecret,
         ) -> Result<(), CredentialStoreError> {
             *self.write_count.lock().expect("write count lock") += 1;
+            *self.secret.lock().expect("secret lock") = Some(secret);
             Ok(())
+        }
+
+        fn get(
+            &self,
+            _metadata: &CredentialMetadata,
+        ) -> Result<CredentialSecret, CredentialStoreError> {
+            self.secret
+                .lock()
+                .expect("secret lock")
+                .take()
+                .ok_or(CredentialStoreError::NotFound)
         }
 
         fn delete(&self, _metadata: &CredentialMetadata) -> Result<(), CredentialStoreError> {
@@ -37,6 +50,13 @@ mod tests {
         }
 
         fn delete(&self, _metadata: &CredentialMetadata) -> Result<(), CredentialStoreError> {
+            Err(CredentialStoreError::Unavailable)
+        }
+
+        fn get(
+            &self,
+            _metadata: &CredentialMetadata,
+        ) -> Result<CredentialSecret, CredentialStoreError> {
             Err(CredentialStoreError::Unavailable)
         }
     }
@@ -60,6 +80,7 @@ mod tests {
         let store = RecordingCredentialStore {
             write_count: Mutex::new(0),
             deleted: Mutex::new(false),
+            secret: Mutex::new(None),
         };
         let metadata = CredentialMetadata::new("provider-secret-reference");
 
@@ -69,9 +90,11 @@ mod tests {
         store
             .set(&metadata, CredentialSecret::new("updated-value"))
             .expect("secret update");
+        let updated = store.get(&metadata).expect("read updated secret");
         store.delete(&metadata).expect("secret deletion");
 
         assert_eq!(*store.write_count.lock().expect("write count lock"), 2);
+        assert_eq!(updated.expose(), "updated-value");
         assert!(*store.deleted.lock().expect("deleted lock"));
     }
 
@@ -144,6 +167,12 @@ pub trait CredentialPort: Send + Sync {
         metadata: &CredentialMetadata,
         secret: CredentialSecret,
     ) -> Result<(), CredentialStoreError>;
+    /// Retrieves a secret only for an in-process provider adapter.
+    ///
+    /// # Errors
+    ///
+    /// Returns a typed error when the secret does not exist or cannot be read.
+    fn get(&self, metadata: &CredentialMetadata) -> Result<CredentialSecret, CredentialStoreError>;
     /// Deletes a secret from the platform credential store.
     ///
     /// # Errors
@@ -155,6 +184,7 @@ pub trait CredentialPort: Send + Sync {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CredentialStoreError {
     Unavailable,
+    NotFound,
     WriteFailed,
     DeleteFailed,
 }
@@ -171,6 +201,14 @@ impl CredentialPort for SystemCredentialStore {
         system_entry(metadata)?
             .set_secret(secret.expose().as_bytes())
             .map_err(|_| CredentialStoreError::WriteFailed)
+    }
+
+    fn get(&self, metadata: &CredentialMetadata) -> Result<CredentialSecret, CredentialStoreError> {
+        let bytes = system_entry(metadata)?
+            .get_secret()
+            .map_err(|_| CredentialStoreError::NotFound)?;
+        let secret = String::from_utf8(bytes).map_err(|_| CredentialStoreError::NotFound)?;
+        Ok(CredentialSecret::new(secret))
     }
 
     fn delete(&self, metadata: &CredentialMetadata) -> Result<(), CredentialStoreError> {

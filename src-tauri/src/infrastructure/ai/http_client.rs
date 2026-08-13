@@ -25,6 +25,11 @@ impl SecureHttpClient {
     pub fn get(&self, url: impl reqwest::IntoUrl) -> reqwest::RequestBuilder {
         self.client.get(url)
     }
+
+    /// Starts a POST request with the client-wide secure redirect policy.
+    pub fn post(&self, url: impl reqwest::IntoUrl) -> reqwest::RequestBuilder {
+        self.client.post(url)
+    }
 }
 
 #[cfg(test)]

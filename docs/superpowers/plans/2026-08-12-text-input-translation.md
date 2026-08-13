@@ -164,11 +164,11 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/tests/fixtures/providers/*.json`
 - Test: shared adapter contract harness
 
-- [ ] Define a failing shared contract for valid adaptive results, auth, rate limit, quota, unavailable model, safety refusal, empty/malformed/schema-invalid/oversized responses, timeout and cancellation.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_contract --locked`; confirm RED because no adapter implements the harness.
-- [ ] Implement reusable fake request/response builders, error expectations and secret-canary assertions without adding any provider adapter.
-- [ ] Run the harness unit tests; expect the harness itself GREEN and adapter conformance still pending.
-- [ ] Commit: `test(providers): define AI provider contract`.
+- [x] Define a failing shared contract for valid adaptive results, auth, rate limit, quota, unavailable model, safety refusal, empty/malformed/schema-invalid/oversized responses, timeout and cancellation.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml provider_contract --locked`; confirm RED because no adapter implements the harness.
+- [x] Implement reusable fake request/response builders, error expectations and secret-canary assertions without adding any provider adapter.
+- [x] Run the harness unit tests; expect the harness itself GREEN and adapter conformance still pending.
+- [x] Commit: `test(providers): define AI provider contract`.
 
 ### Task 8.1: Implement OpenAI and OpenAI-compatible adapters
 
@@ -176,11 +176,11 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/infrastructure/ai/openai.rs`, `openai_compatible.rs`
 - Test: adapters through the Task 8 contract
 
-- [ ] Register both unimplemented adapters in the shared contract and run the focused suite; confirm RED for missing request/response/error behavior.
-- [ ] Implement native OpenAI and the explicitly supported OpenAI-compatible subset, including structure, cancellation and connection capability test.
-- [ ] Simulate chunked delivery and prove neither adapter returns正文 before full response validation.
-- [ ] Run both shared contracts, redirect tests and secret-canary scan; expect GREEN.
-- [ ] Commit: `feat(providers): add OpenAI translation adapters`.
+- [x] Register both unimplemented adapters in the shared contract and run the focused suite; confirm RED for missing request/response/error behavior.
+- [x] Implement native OpenAI and the explicitly supported OpenAI-compatible subset, including structure, cancellation and connection capability test.
+- [x] Simulate chunked delivery and prove neither adapter returns正文 before full response validation.
+- [x] Run both shared contracts, redirect tests and secret-canary scan; expect GREEN.
+- [x] Commit: `feat(providers): add OpenAI translation adapters`.
 
 ### Task 8.2: Implement the Anthropic native adapter
 
@@ -188,10 +188,10 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/infrastructure/ai/anthropic.rs`
 - Test: adapter through the Task 8 contract
 
-- [ ] Register the unimplemented Anthropic adapter and run its shared contract; confirm RED.
-- [ ] Implement native Messages/structured-output request, complete-response parsing and native error/safety mapping.
-- [ ] Run the Anthropic contract, cancellation, malformed response and secret-canary tests; expect GREEN.
-- [ ] Commit: `feat(providers): add Anthropic translation adapter`.
+- [x] Register the unimplemented Anthropic adapter and run its shared contract; confirm RED.
+- [x] Implement native Messages/structured-output request, complete-response parsing and native error/safety mapping.
+- [x] Run the Anthropic contract, cancellation, malformed response and secret-canary tests; expect GREEN.
+- [x] Commit: `feat(providers): add Anthropic translation adapter`.
 
 ### Task 8.3: Implement the Gemini native adapter
 
@@ -199,10 +199,10 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/infrastructure/ai/gemini.rs`
 - Test: adapter through the Task 8 contract
 
-- [ ] Register the unimplemented Gemini adapter and run its shared contract; confirm RED.
-- [ ] Implement native content-generation/response-schema request, complete-response parsing and native error/safety mapping.
-- [ ] Run the Gemini contract, cancellation, malformed response and secret-canary tests; expect GREEN.
-- [ ] Commit: `feat(providers): add Gemini translation adapter`.
+- [x] Register the unimplemented Gemini adapter and run its shared contract; confirm RED.
+- [x] Implement native content-generation/response-schema request, complete-response parsing and native error/safety mapping.
+- [x] Run the Gemini contract, cancellation, malformed response and secret-canary tests; expect GREEN.
+- [x] Commit: `feat(providers): add Gemini translation adapter`.
 
 ### Task 9: Implement deterministic long-text processing
 
@@ -212,12 +212,12 @@ Resolve exact compatible versions from current official documentation during imp
 - Create: `src-tauri/src/application/translation/chunker.rs`
 - Test: same module
 
-- [ ] Write failing boundary tests for paragraphs, oversized sentences, emoji/graphemes, code blocks, lists, index continuity and exact source reconstruction.
-- [ ] Write failing orchestration tests proving max concurrency two, source-order output after out-of-order completion, all-or-nothing failure and child cancellation.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml chunk --locked`; confirm RED.
-- [ ] Implement deterministic chunk plan, bounded executor and merge validator; only final complete result is persisted/published.
-- [ ] Run property tests and Clippy.
-- [ ] Commit: `feat(translation): add ordered long-text processing`.
+- [x] Write failing boundary tests for paragraphs, oversized sentences, emoji/graphemes, code blocks, lists, index continuity and exact source reconstruction.
+- [x] Write failing orchestration tests proving max concurrency two, source-order output after out-of-order completion, all-or-nothing failure and child cancellation.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml chunk --locked`; confirm RED.
+- [x] Implement deterministic chunk plan, bounded executor and merge validator; only final complete result is persisted/published.
+- [x] Run property tests and Clippy.
+- [x] Commit: `feat(translation): add ordered long-text processing`.
 
 ### Task 10: Implement `QuerySupervisor` and `TranslationService`
 

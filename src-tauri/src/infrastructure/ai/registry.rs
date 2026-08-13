@@ -52,6 +52,14 @@ impl AiProviderRegistry {
         &DESCRIPTORS
     }
 
+    /// Returns the immutable descriptor for a compiled-in protocol.
+    #[must_use]
+    pub fn descriptor(&self, protocol: ProviderProtocol) -> Option<&'static ProviderDescriptor> {
+        DESCRIPTORS
+            .iter()
+            .find(|descriptor| descriptor.protocol == protocol)
+    }
+
     /// Resolves a profile only when it is enabled and its endpoint remains safe.
     ///
     /// # Errors
@@ -68,9 +76,7 @@ impl AiProviderRegistry {
             ProviderEndpoint::parse(endpoint.url().as_str())
                 .map_err(|_| ProviderRegistryError::InvalidEndpoint)?;
         }
-        DESCRIPTORS
-            .iter()
-            .find(|descriptor| descriptor.protocol == profile.protocol())
+        self.descriptor(profile.protocol())
             .ok_or(ProviderRegistryError::UnsupportedProtocol)
     }
 }
