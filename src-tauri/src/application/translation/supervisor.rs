@@ -8,7 +8,8 @@ use tokio_util::sync::CancellationToken;
 
 use crate::{
     domain::translation::{
-        AdaptiveTranslationResult, ResultVersion, TranslationAttemptId, TranslationSessionId,
+        AdaptiveTranslationResult, AttemptStatus, ResultVersion, TranslationAttemptId,
+        TranslationSessionId,
     },
     infrastructure::ai::contract_fixtures::{
         AiTranslationProvider, ProviderError, ProviderTranslationRequest,
@@ -53,6 +54,7 @@ pub struct AttemptSnapshot {
     id: TranslationAttemptId,
     result_version: ResultVersion,
     result: Option<AdaptiveTranslationResult>,
+    status: AttemptStatus,
     configuration:
         Option<crate::application::translation::service::TranslationConfigurationSnapshot>,
 }
@@ -66,6 +68,11 @@ impl AttemptSnapshot {
     #[must_use]
     pub const fn result_version(&self) -> ResultVersion {
         self.result_version
+    }
+
+    #[must_use]
+    pub const fn status(&self) -> AttemptStatus {
+        self.status
     }
 
     #[must_use]
@@ -137,6 +144,7 @@ impl QuerySupervisor {
                                 id: TranslationAttemptId::generate(),
                                 result_version: ResultVersion::initial(),
                                 result: None,
+                                status: AttemptStatus::Queued,
                                 configuration: None,
                             },
                         }],
@@ -144,13 +152,21 @@ impl QuerySupervisor {
                 },
             );
         }
+        self.set_latest_attempt_status(session_id, "__primary", AttemptStatus::Running);
         let result = primary.translate(request, cancellation.clone()).await;
         if cancellation.is_cancelled() {
+            self.set_latest_attempt_status(session_id, "__primary", AttemptStatus::Cancelled);
             return Err(ProviderError::new(
                 crate::infrastructure::ai::contract_fixtures::ProviderErrorKind::Cancelled,
             ));
         }
-        let translation = result?;
+        let translation = match result {
+            Ok(translation) => translation,
+            Err(error) => {
+                self.set_latest_attempt_status(session_id, "__primary", AttemptStatus::Failed);
+                return Err(error);
+            }
+        };
         let mut state = self.state.lock().expect("supervisor state lock");
         let current_session = state.windows.get(window_label) == Some(&session_id);
         let session = state.sessions.get_mut(&session_id);
@@ -174,7 +190,23 @@ impl QuerySupervisor {
             .last_mut()
             .expect("primary latest attempt");
         attempt.snapshot.result = Some(translation.clone());
+        attempt.snapshot.status = AttemptStatus::Succeeded;
         Ok((session_id, translation))
+    }
+
+    /// Returns the active session identity for a window, including a failed session retained for retry.
+    ///
+    /// # Panics
+    ///
+    /// Panics only if the supervisor's internal state mutex is poisoned.
+    #[must_use]
+    pub fn latest_window_session(&self, window_label: &str) -> Option<TranslationSessionId> {
+        self.state
+            .lock()
+            .expect("supervisor state lock")
+            .windows
+            .get(window_label)
+            .copied()
     }
 
     /// Submits a primary request once for a completed submission ID and returns the already-published session on repeat.
@@ -361,12 +393,30 @@ impl QuerySupervisor {
                         id: TranslationAttemptId::generate(),
                         result_version: next_version,
                         result: None,
+                        status: AttemptStatus::Queued,
                         configuration: None,
                     },
                 });
             session.cancellation.clone()
         };
-        let translation = provider.translate(request, cancellation.clone()).await?;
+        self.set_latest_attempt_status(session_id, provider_key, AttemptStatus::Running);
+        let translation = match provider.translate(request, cancellation.clone()).await {
+            Ok(translation) => translation,
+            Err(error) => {
+                self.set_latest_attempt_status(
+                    session_id,
+                    provider_key,
+                    if error.kind()
+                        == crate::infrastructure::ai::contract_fixtures::ProviderErrorKind::Cancelled
+                    {
+                        AttemptStatus::Cancelled
+                    } else {
+                        AttemptStatus::Failed
+                    },
+                );
+                return Err(error);
+            }
+        };
         let mut state = self.state.lock().expect("supervisor state lock");
         let session = state.sessions.get_mut(&session_id).ok_or_else(|| {
             ProviderError::new(
@@ -384,6 +434,7 @@ impl QuerySupervisor {
             .and_then(|attempts| attempts.last_mut())
             .expect("retry attempt exists");
         latest.snapshot.result = Some(translation.clone());
+        latest.snapshot.status = AttemptStatus::Succeeded;
         session
             .completed_results
             .insert(provider_key.to_owned(), translation.clone());
@@ -452,6 +503,25 @@ impl QuerySupervisor {
             && let Some(session) = state.sessions.get(&session_id)
         {
             session.cancellation.cancel();
+        }
+    }
+
+    fn set_latest_attempt_status(
+        &self,
+        session_id: TranslationSessionId,
+        provider_key: &str,
+        status: AttemptStatus,
+    ) {
+        if let Some(attempt) = self
+            .state
+            .lock()
+            .expect("supervisor state lock")
+            .sessions
+            .get_mut(&session_id)
+            .and_then(|session| session.attempts.get_mut(provider_key))
+            .and_then(|attempts| attempts.last_mut())
+        {
+            attempt.snapshot.status = status;
         }
     }
 }
@@ -744,5 +814,60 @@ mod tests {
 
         assert_eq!(first.0, second.0);
         assert_eq!(provider.calls.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn primary_failure_is_retained_as_a_failed_attempt_snapshot() {
+        let supervisor = super::QuerySupervisor::new();
+        let provider: Arc<dyn AiTranslationProvider> =
+            Arc::new(CountingProvider(AtomicUsize::new(0)));
+
+        let _ = supervisor
+            .submit_primary("main", provider, Vec::new(), provider_request())
+            .await
+            .expect_err("provider failure");
+        let session_id = supervisor.latest_window_session("main").expect("session");
+
+        assert_eq!(
+            supervisor
+                .latest_attempt(session_id, "__primary")
+                .expect("attempt")
+                .status(),
+            crate::domain::translation::AttemptStatus::Failed
+        );
+    }
+
+    #[tokio::test]
+    async fn failed_retry_marks_only_the_new_attempt_failed_and_retains_prior_success() {
+        let supervisor = super::QuerySupervisor::new();
+        let success = Arc::new(SuccessCountingProvider(AtomicUsize::new(0)));
+        let primary: Arc<dyn AiTranslationProvider> = success.clone();
+        let (session_id, _) = supervisor
+            .submit_primary("main", primary, Vec::new(), provider_request())
+            .await
+            .expect("success");
+        let previous = supervisor
+            .latest_attempt(session_id, "__primary")
+            .expect("previous");
+        let failure: Arc<dyn AiTranslationProvider> =
+            Arc::new(CountingProvider(AtomicUsize::new(0)));
+
+        let _ = supervisor
+            .retry_provider(session_id, "__primary", failure, provider_request())
+            .await
+            .expect_err("retry failure");
+        let latest = supervisor
+            .latest_attempt(session_id, "__primary")
+            .expect("latest");
+
+        assert_eq!(
+            previous.status(),
+            crate::domain::translation::AttemptStatus::Succeeded
+        );
+        assert_eq!(
+            latest.status(),
+            crate::domain::translation::AttemptStatus::Failed
+        );
+        assert!(previous.result().is_some());
     }
 }
