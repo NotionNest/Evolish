@@ -3,6 +3,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 
 use crate::{
@@ -23,12 +24,28 @@ pub struct QuerySupervisor {
 struct SupervisorState {
     windows: HashMap<String, TranslationSessionId>,
     sessions: HashMap<TranslationSessionId, SessionState>,
+    completed_submissions: HashMap<String, TranslationSessionId>,
+    in_flight_submissions: HashMap<String, Arc<Notify>>,
 }
 
 struct SessionState {
     cancellation: CancellationToken,
     completed_results: HashMap<String, AdaptiveTranslationResult>,
     attempts: HashMap<String, Vec<AttemptRecord>>,
+}
+
+fn completed_submission_from_state(
+    state: &SupervisorState,
+    submission_id: &str,
+) -> Option<(TranslationSessionId, AdaptiveTranslationResult)> {
+    let session_id = *state.completed_submissions.get(submission_id)?;
+    let result = state
+        .sessions
+        .get(&session_id)?
+        .completed_results
+        .get("__primary")?
+        .clone();
+    Some((session_id, result))
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -158,6 +175,61 @@ impl QuerySupervisor {
             .expect("primary latest attempt");
         attempt.snapshot.result = Some(translation.clone());
         Ok((session_id, translation))
+    }
+
+    /// Submits a primary request once for a completed submission ID and returns the already-published session on repeat.
+    ///
+    /// # Errors
+    ///
+    /// Returns the primary provider's classified failure or cancellation result.
+    ///
+    /// # Panics
+    ///
+    /// Panics only if the supervisor's internal state mutex is poisoned.
+    pub async fn submit_primary_idempotent(
+        &self,
+        window_label: &str,
+        submission_id: &str,
+        primary: Arc<dyn AiTranslationProvider>,
+        request: ProviderTranslationRequest,
+    ) -> Result<(TranslationSessionId, AdaptiveTranslationResult), ProviderError> {
+        loop {
+            let wait = {
+                let mut state = self.state.lock().expect("supervisor state lock");
+                if let Some(existing) = completed_submission_from_state(&state, submission_id) {
+                    return Ok(existing);
+                }
+                if let Some(notify) = state.in_flight_submissions.get(submission_id) {
+                    Some(Arc::clone(notify).notified_owned())
+                } else {
+                    state
+                        .in_flight_submissions
+                        .insert(submission_id.to_owned(), Arc::new(Notify::new()));
+                    None
+                }
+            };
+            if let Some(wait) = wait {
+                wait.await;
+            } else {
+                break;
+            }
+        }
+        let result = self
+            .submit_primary(window_label, primary, Vec::new(), request)
+            .await;
+        let mut state = self.state.lock().expect("supervisor state lock");
+        let notify = state
+            .in_flight_submissions
+            .remove(submission_id)
+            .expect("submission was registered");
+        if let Ok((session_id, _)) = result {
+            state
+                .completed_submissions
+                .insert(submission_id.to_owned(), session_id);
+        }
+        drop(state);
+        notify.notify_waiters();
+        result
     }
 
     /// Returns the latest attempt snapshot for a provider within a session.
@@ -454,6 +526,7 @@ mod tests {
     struct LateSuccessProvider {
         started: Notify,
         release: Notify,
+        calls: AtomicUsize,
     }
 
     #[async_trait]
@@ -469,6 +542,7 @@ mod tests {
             _: ProviderTranslationRequest,
             _: CancellationToken,
         ) -> Result<crate::domain::translation::AdaptiveTranslationResult, ProviderError> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
             self.started.notify_one();
             self.release.notified().await;
             Ok(
@@ -490,6 +564,7 @@ mod tests {
         let late = Arc::new(LateSuccessProvider {
             started: Notify::new(),
             release: Notify::new(),
+            calls: AtomicUsize::new(0),
         });
         let late_provider: Arc<dyn AiTranslationProvider> = late.clone();
         let first_supervisor = Arc::clone(&supervisor);
@@ -610,5 +685,64 @@ mod tests {
         );
         assert_eq!(retried, *latest.result().expect("latest result"));
         assert_eq!(provider.0.load(Ordering::SeqCst), 2);
+    }
+
+    #[tokio::test]
+    async fn duplicate_submission_id_reuses_the_existing_session_without_a_second_primary_call() {
+        let supervisor = super::QuerySupervisor::new();
+        let provider = Arc::new(SuccessCountingProvider(AtomicUsize::new(0)));
+        let first = supervisor
+            .submit_primary_idempotent("main", "submit-1", provider.clone(), provider_request())
+            .await
+            .expect("first success");
+        let duplicate = supervisor
+            .submit_primary_idempotent("main", "submit-1", provider.clone(), provider_request())
+            .await
+            .expect("duplicate success");
+
+        assert_eq!(first.0, duplicate.0);
+        assert_eq!(provider.0.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn concurrent_duplicate_submission_id_waits_for_one_primary_request() {
+        let supervisor = Arc::new(super::QuerySupervisor::new());
+        let provider = Arc::new(LateSuccessProvider {
+            started: Notify::new(),
+            release: Notify::new(),
+            calls: AtomicUsize::new(0),
+        });
+        let first_supervisor = Arc::clone(&supervisor);
+        let first_provider: Arc<dyn AiTranslationProvider> = provider.clone();
+        let first = tokio::spawn(async move {
+            first_supervisor
+                .submit_primary_idempotent(
+                    "main",
+                    "submit-concurrent",
+                    first_provider,
+                    provider_request(),
+                )
+                .await
+        });
+        provider.started.notified().await;
+        let second_supervisor = Arc::clone(&supervisor);
+        let second_provider: Arc<dyn AiTranslationProvider> = provider.clone();
+        let second = tokio::spawn(async move {
+            second_supervisor
+                .submit_primary_idempotent(
+                    "main",
+                    "submit-concurrent",
+                    second_provider,
+                    provider_request(),
+                )
+                .await
+        });
+
+        provider.release.notify_one();
+        let first = first.await.expect("first task").expect("first success");
+        let second = second.await.expect("second task").expect("second success");
+
+        assert_eq!(first.0, second.0);
+        assert_eq!(provider.calls.load(Ordering::SeqCst), 1);
     }
 }
