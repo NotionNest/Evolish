@@ -10,3 +10,5 @@ pub mod ports;
 pub mod prompt_compiler;
 pub mod provider_selection;
 pub mod result_validator;
+pub mod service;
+pub mod supervisor;
